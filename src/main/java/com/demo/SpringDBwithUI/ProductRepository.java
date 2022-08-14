@@ -7,6 +7,6 @@ public interface ProductRepository extends CrudRepository<Product, Integer> {
 
     List<Product> findByName(String name);
     Product findById(int id);
-    Product findByNameAndWeight(String name, float weight);
+    Product findByNameAndWeight(String name, double weight);
 
 }

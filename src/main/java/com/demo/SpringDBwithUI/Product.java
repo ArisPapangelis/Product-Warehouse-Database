@@ -3,26 +3,24 @@ package com.demo.SpringDBwithUI;
 import javax.persistence.*;
 
 @Entity
-@Table(name = "Product")
+@Table(name = "Products")
 public class Product {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Integer id;
 
-
     private String name;
-    private Float weight;
+    private Double weight;
     private String availability;
-    private Float price;
+    private Double price;
     private String category;
     private String description;
 
-    protected Product() {
-    }
+    protected  Product() {
 
-    public Product(Integer id, String name, Float weight, String availability, Float price, String category, String description) {
-        this.id = id;
+    }
+    public Product(String name, Double weight, String availability, Double price, String category, String description) {
         this.name = name;
         this.weight = weight;
         this.availability = availability;
@@ -60,11 +58,11 @@ public class Product {
         this.id = id;
     }
 
-    public Float getWeight() {
+    public Double getWeight() {
         return weight;
     }
 
-    public void setWeight(Float weight) {
+    public void setWeight(Double weight) {
         this.weight = weight;
     }
 
@@ -76,11 +74,11 @@ public class Product {
         this.availability = availability;
     }
 
-    public Float getPrice() {
+    public Double getPrice() {
         return price;
     }
 
-    public void setPrice(Float price) {
+    public void setPrice(Double price) {
         this.price = price;
     }
 
