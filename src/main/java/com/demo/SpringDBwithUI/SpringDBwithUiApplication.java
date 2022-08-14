@@ -47,18 +47,12 @@ public class SpringDBwithUiApplication implements CommandLineRunner {
 		}
 		log.info("");
 
-		// fetch an individual product by ID
-		Product product = repository.findById(3);
-		log.info("Product found with findById(3):");
-		log.info("--------------------------------");
-		log.info(product.toString());
-		log.info("");
-
 		// fetch an individual product by name and weight
-		product = repository.findByNameAndWeight("Oregano",100.0);
 		log.info("Product found with findByNameAndWeight('Oregano', 100.0):");
 		log.info("--------------------------------");
-		log.info(product.toString());
+		for (Product product : repository.findByNameAndWeight("Oregano",100.0)) {
+			log.info(product.toString());
+		}
 		log.info("");
 
 		// fetch products by name
@@ -68,6 +62,19 @@ public class SpringDBwithUiApplication implements CommandLineRunner {
 			log.info(blend.toString());
 		}
 		log.info("");
+
+		/*
+
+		// fetch an individual product by ID
+		log.info("Product found with findById(3):");
+		log.info("--------------------------------");
+		for (Product product : repository.findById(3)) {
+			log.info(product.toString());
+		}
+		log.info("");
+
+		 */
+
 
 	}
 

@@ -5,8 +5,8 @@ import org.springframework.data.repository.CrudRepository;
 
 public interface ProductRepository extends CrudRepository<Product, Integer> {
 
+    //Product findById(int id);
     List<Product> findByName(String name);
-    Product findById(int id);
-    Product findByNameAndWeight(String name, double weight);
+    List<Product> findByNameAndWeight(String name, double weight);
 
 }
