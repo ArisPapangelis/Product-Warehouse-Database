@@ -1,6 +1,12 @@
 package com.demo.SpringDBwithUI;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import javax.persistence.*;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 
 @Entity
 @Table(name = "Products")
@@ -8,14 +14,30 @@ public class Product {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private Integer id;
-
+    private Long id;
+    @NotBlank(message = "Field can't be empty")
     private String name;
+    @Min(value = 0, message = "Must be a positive number")
+    @NotNull(message = "Field can't be empty")
     private Double weight;
+    @NotBlank(message = "Field can't be empty")
     private String availability;
+    @Min(value = 0, message = "Must be a positive number")
+    @NotNull(message = "Field can't be empty")
     private Double price;
+    @NotBlank(message = "Field can't be empty")
     private String category;
+    @NotBlank(message = "Field can't be empty")
     private String description;
+
+    /*
+    @ManyToOne
+    @JoinColumn(name = "companyID")
+    @NotNull
+    @JsonIgnoreProperties({"products"})
+    private Company company;
+
+     */
 
     protected  Product() {
 
@@ -50,11 +72,11 @@ public class Product {
         this.name = name;
     }
 
-    public Integer getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(Integer id) {
+    public void setId(Long id) {
         this.id = id;
     }
 

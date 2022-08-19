@@ -1,5 +1,9 @@
 package com.demo.SpringDBwithUI;
 
+import com.vaadin.flow.component.page.AppShellConfigurator;
+import com.vaadin.flow.theme.Theme;
+import com.vaadin.flow.theme.lumo.Lumo;
+import com.vaadin.flow.theme.material.Material;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,33 +15,41 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.xml.crypto.Data;
 import java.util.List;
 import java.util.Optional;
 
 @SpringBootApplication
 @RestController
-public class SpringDBwithUiApplication implements CommandLineRunner {
+@Theme(themeClass = Lumo.class, variant = Lumo.LIGHT)
+public class SpringDBwithUiApplication implements CommandLineRunner, AppShellConfigurator {
 
+	private final ProductRepository repository;
+	private final DataService dataService;
+
+	private static final Logger log = LoggerFactory.getLogger(SpringDBwithUiApplication.class);
+	public SpringDBwithUiApplication(DataService dataService, ProductRepository repository) {
+		this.repository = repository;
+		this.dataService = dataService;
+	}
 
 	public static void main(String[] args) {
 		SpringApplication.run(SpringDBwithUiApplication.class, args);
 	}
 
-	@Autowired
-	private ProductRepository repository;
 
-	private static final Logger log = LoggerFactory.getLogger(SpringDBwithUiApplication.class);
 
 	@Override
 	public void run(String... args) throws Exception {
-		repository.save(new Product("Oregano", 30.0, "Available", 2.70, "Monovarietal", "100% Organic oregano from the mountains of Epirus"));
-		repository.save(new Product("Oregano", 100.0, "Not available", 7.00, "Monovarietal", "100% Organic oregano from the mountains of Epirus"));
-		repository.save(new Product("Thyme", 30.0, "Available", 2.70, "Monovarietal", "100% Organic thyme from the mountains of Epirus"));
-		repository.save(new Product("Mountain tea", 20.0, "Available", 2.80, "Monovarietal", "100% Organic mountain tea from the mountains of Epirus"));
-		repository.save(new Product("Eudora", 20.0, "Available", 5.50, "Blend", "100% Organic blend from the mountains of Epirus"));
-		repository.save(new Product("Basil", 30.0, "Available", 2.70, "Monovarietal", "100% Organic basil from the mountains of Epirus"));
+		dataService.saveCompany(new Company("Myrtali Organics", 12150502L, "6945212153", "info@myrtaliorganics.gr", "Konstantinou Palaiologou 3"));
+		dataService.saveCompany(new Company("Aris Pap", 12150342L, "6946126130", "aris.papagelis@gmail.com", "Meletiou Geografou 29"));
 
-
+		dataService.saveProduct(new Product("Oregano", 30.0, "Available", 2.70, "Monovarietal", "100% Organic oregano from the mountains of Epirus"));
+		dataService.saveProduct(new Product("Oregano", 100.0, "Not available", 7.00, "Monovarietal", "100% Organic oregano from the mountains of Epirus"));
+		dataService.saveProduct(new Product("Thyme", 30.0, "Available", 2.70, "Monovarietal", "100% Organic thyme from the mountains of Epirus"));
+		dataService.saveProduct(new Product("Mountain tea", 20.0, "Available", 2.80, "Monovarietal", "100% Organic mountain tea from the mountains of Epirus"));
+		dataService.saveProduct(new Product("Eudora", 20.0, "Available", 5.50, "Blend", "100% Organic blend from the mountains of Epirus"));
+		dataService.saveProduct(new Product("Basil", 30.0, "Available", 2.70, "Monovarietal", "100% Organic basil from the mountains of Epirus"));
 
 		// fetch all products
 		log.info("Products found with findAll():");
