@@ -30,25 +30,26 @@ public class Product {
     @NotBlank(message = "Field can't be empty")
     private String description;
 
-    /*
+
     @ManyToOne
     @JoinColumn(name = "companyID")
     @NotNull
     @JsonIgnoreProperties({"products"})
     private Company company;
 
-     */
 
-    protected  Product() {
+
+    public  Product() {
 
     }
-    public Product(String name, Double weight, String availability, Double price, String category, String description) {
+    public Product(String name, Double weight, String availability, Double price, String category, String description, Company company) {
         this.name = name;
         this.weight = weight;
         this.availability = availability;
         this.price = price;
         this.category = category;
         this.description = description;
+        this.company = company;
     }
 
     @Override
@@ -61,6 +62,7 @@ public class Product {
                 ", price=" + price +
                 ", category='" + category + '\'' +
                 ", description='" + description + '\'' +
+                ", company=" + company.getCompany() +
                 '}';
     }
 
@@ -118,5 +120,29 @@ public class Product {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public Company getCompany() {
+        return company;
+    }
+
+    public void setCompany(Company company) {
+        this.company = company;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Product product = (Product) o;
+
+        if (!name.equals(product.name)) return false;
+        if (!weight.equals(product.weight)) return false;
+        if (!availability.equals(product.availability)) return false;
+        if (!price.equals(product.price)) return false;
+        if (!category.equals(product.category)) return false;
+        if (!description.equals(product.description)) return false;
+        return company.equals(product.company);
     }
 }

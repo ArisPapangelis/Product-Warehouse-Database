@@ -1,5 +1,7 @@
 package com.demo.SpringDBwithUI;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import javax.persistence.*;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.Min;
@@ -9,6 +11,7 @@ import java.util.List;
 
 @Entity
 @Table(name = "Companies")
+//@JsonIgnoreProperties("products")
 public class Company {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -26,12 +29,9 @@ public class Company {
     @NotBlank(message = "Field can't be empty")
     private String address;
 
-    /*
     @OneToMany(mappedBy = "company")
-    @NotNull
+    @JsonIgnoreProperties({"company"})
     private List<Product> products;
-
-     */
 
 
 
@@ -46,13 +46,10 @@ public class Company {
         this.address = address;
     }
 
-
-
     @Override
     public String toString() {
         return "Company{" +
-                "id=" + id +
-                ", company='" + company + '\'' +
+                "company='" + company + '\'' +
                 ", taxNumber=" + taxNumber +
                 ", phoneNumber='" + phoneNumber + '\'' +
                 ", email='" + email + '\'' +
@@ -106,5 +103,17 @@ public class Company {
 
     public void setAddress(String address) {
         this.address = address;
+    }
+
+    public List<Product> getProducts() {
+        return products;
+    }
+
+    public void setProducts(List<Product> products) {
+        this.products = products;
+    }
+
+    public String toHtml() {
+        return "     Company Info:     " + "Company=" + company  + "     Tax Number=" + taxNumber + "     Phone Number=" + phoneNumber + "     Email=" + email + "     Address=" + address;
     }
 }

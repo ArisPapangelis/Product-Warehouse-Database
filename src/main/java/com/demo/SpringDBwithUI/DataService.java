@@ -18,10 +18,17 @@ public class DataService {
         this.companyRepository = companyRepository;
     }
 
-    public List<Product> findAllProducts(String filterText) {
-        if (filterText == null || filterText.isEmpty()) {
+    public List<Product> findAllProducts(String filterText, Company company) {
+        if ((filterText == null || filterText.isEmpty()) && company==null) {
             return (List<Product>) productRepository.findAll();
-        } else {
+        }
+        else if (company != null && filterText  != null) {
+            return productRepository.findByNameStartsWithIgnoreCaseAndCompanyId(filterText, company.getId());
+        }
+        else if (filterText == null) {
+            return productRepository.findByCompanyId(company.getId());
+        }
+        else {
             return productRepository.findByNameStartsWithIgnoreCase(filterText);
         }
     }
@@ -30,40 +37,66 @@ public class DataService {
         return productRepository.findById(id);
     }
 
-    public void deleteProduct(Product product) {
+    public boolean deleteProduct(Product product) {
         if (productRepository.findById(product.getId()).isEmpty()) {
             System.err.println("Product does not exist");
-            return;
+            return false;
         }
         productRepository.delete(product);
+        return true;
     }
 
-    public void saveProduct(Product product) {
+    public boolean saveProduct(Product product) {
         if (product == null) {
             System.err.println("Product is null, cannot save product");
-            return;
+            return false;
+        }
+        if (productRepository.findByNameAndWeight(product.getName(), product.getWeight()).isPresent()) {
+            System.err.println("Product already exists, cannot save product");
+            return false;
         }
         productRepository.save(product);
+        return true;
+    }
+
+    public boolean updateProduct(Product product) {
+        if (product == null) {
+            System.err.println("Product is null, cannot save product");
+            return false;
+        }
+        Optional<Product> p = productRepository.findByNameAndWeight(product.getName(), product.getWeight());
+        if (p.isPresent() && p.get().getId()!= product.getId()) {
+            System.err.println("Product already exists in the given quantity, cannot save product");
+            return false;
+        }
+        productRepository.save(product);
+        return true;
     }
 
     public List<Company> findAllCompanies() {
         return (List<Company>) companyRepository.findAll();
     }
 
-    public void deleteCompany(Company company) {
-        if (companyRepository.findById(company.getId()).isEmpty()) {
+    public boolean deleteCompany(Company company) {
+        if (companyRepository.findByCompany(company.getCompany()).isEmpty()) {
             System.err.println("Company does not exist");
-            return;
+            return false;
         }
         companyRepository.delete(company);
+        return true;
     }
 
-    public void saveCompany(Company company) {
+    public boolean saveCompany(Company company) {
         if (company == null) {
             System.err.println("Company is null, cannot save company");
-            return;
+            return false;
+        }
+        else if (companyRepository.findByCompany(company.getCompany()).isPresent()) {
+            System.err.println("Company already exists");
+            return false;
         }
         companyRepository.save(company);
+        return true;
     }
 
 }

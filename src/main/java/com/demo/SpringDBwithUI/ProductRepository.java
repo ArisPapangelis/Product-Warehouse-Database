@@ -10,7 +10,11 @@ public interface ProductRepository extends CrudRepository<Product, Long> {
     //Product findById(int id);
     List<Product> findByName(String name);
     List<Product> findByNameStartsWithIgnoreCase(String name);
-    List<Product> findByNameAndWeight(String name, double weight);
+    Optional<Product> findByNameAndWeight(String name, double weight);
+
+    List<Product> findByNameStartsWithIgnoreCaseAndCompanyId(String name, long id);
+
+    List<Product> findByCompanyId(long id);
 
 
 }

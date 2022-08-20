@@ -3,20 +3,14 @@ package com.demo.SpringDBwithUI;
 import com.vaadin.flow.component.page.AppShellConfigurator;
 import com.vaadin.flow.theme.Theme;
 import com.vaadin.flow.theme.lumo.Lumo;
-import com.vaadin.flow.theme.material.Material;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.xml.crypto.Data;
-import java.util.List;
 import java.util.Optional;
 
 @SpringBootApplication
@@ -41,15 +35,20 @@ public class SpringDBwithUiApplication implements CommandLineRunner, AppShellCon
 
 	@Override
 	public void run(String... args) throws Exception {
-		dataService.saveCompany(new Company("Myrtali Organics", 12150502L, "6945212153", "info@myrtaliorganics.gr", "Konstantinou Palaiologou 3"));
-		dataService.saveCompany(new Company("Aris Pap", 12150342L, "6946126130", "aris.papagelis@gmail.com", "Meletiou Geografou 29"));
+		Company company = new Company("Myrtali Organics", 12150502L, "6945212153", "info@myrtaliorganics.gr", "Konstantinou Palaiologou 3");
+		dataService.saveCompany(company);
+		dataService.saveProduct(new Product("Oregano", 30.0, "Available", 2.70, "Monovarietal", "100% Organic oregano from the mountains of Epirus", company));
+		dataService.saveProduct(new Product("Oregano", 100.0, "Not available", 7.00, "Monovarietal", "100% Organic oregano from the mountains of Epirus", company));
+		dataService.saveProduct(new Product("Thyme", 30.0, "Available", 2.70, "Monovarietal", "100% Organic thyme from the mountains of Epirus", company));
+		dataService.saveProduct(new Product("Mountain tea", 20.0, "Available", 2.80, "Monovarietal", "100% Organic mountain tea from the mountains of Epirus", company));
+		dataService.saveProduct(new Product("Eudora", 20.0, "Available", 5.50, "Blend", "100% Organic blend from the mountains of Epirus", company));
+		dataService.saveProduct(new Product("Basil", 30.0, "Available", 2.70, "Monovarietal", "100% Organic basil from the mountains of Epirus", company));
 
-		dataService.saveProduct(new Product("Oregano", 30.0, "Available", 2.70, "Monovarietal", "100% Organic oregano from the mountains of Epirus"));
-		dataService.saveProduct(new Product("Oregano", 100.0, "Not available", 7.00, "Monovarietal", "100% Organic oregano from the mountains of Epirus"));
-		dataService.saveProduct(new Product("Thyme", 30.0, "Available", 2.70, "Monovarietal", "100% Organic thyme from the mountains of Epirus"));
-		dataService.saveProduct(new Product("Mountain tea", 20.0, "Available", 2.80, "Monovarietal", "100% Organic mountain tea from the mountains of Epirus"));
-		dataService.saveProduct(new Product("Eudora", 20.0, "Available", 5.50, "Blend", "100% Organic blend from the mountains of Epirus"));
-		dataService.saveProduct(new Product("Basil", 30.0, "Available", 2.70, "Monovarietal", "100% Organic basil from the mountains of Epirus"));
+		company = new Company("Aris Pap", 12150342L, "6946126130", "aris.papagelis@gmail.com", "Meletiou Geografou 29");
+		dataService.saveCompany(company);
+		dataService.saveProduct(new Product("Coding", 100.0, "Available", 100.0, "Service", "Coding Services", company));
+
+
 
 		// fetch all products
 		log.info("Products found with findAll():");
@@ -62,9 +61,15 @@ public class SpringDBwithUiApplication implements CommandLineRunner, AppShellCon
 		// fetch an individual product by name and weight
 		log.info("Product found with findByNameAndWeight('Oregano', 100.0):");
 		log.info("--------------------------------");
-		for (Product product : repository.findByNameAndWeight("Oregano",100.0)) {
-			log.info(product.toString());
+		Optional<Product> product = repository.findByNameAndWeight("Oregano",100.0);
+		if (product.isPresent()){
+			log.info(product.get().toString());
 		}
+		else {
+			log.info("Product not found");
+		}
+
+
 		log.info("");
 
 		// fetch products by name
@@ -75,17 +80,6 @@ public class SpringDBwithUiApplication implements CommandLineRunner, AppShellCon
 		}
 		log.info("");
 
-		/*
-
-		// fetch an individual product by ID
-		log.info("Product found with findById(3):");
-		log.info("--------------------------------");
-		for (Product product : repository.findById(3)) {
-			log.info(product.toString());
-		}
-		log.info("");
-
-		 */
 
 
 	}
