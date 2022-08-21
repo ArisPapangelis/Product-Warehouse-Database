@@ -11,7 +11,6 @@ import java.util.List;
 
 @Entity
 @Table(name = "Companies")
-//@JsonIgnoreProperties("products")
 public class Company {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -113,7 +112,4 @@ public class Company {
         this.products = products;
     }
 
-    public String toHtml() {
-        return "     Company Info:     " + "Company=" + company  + "     Tax Number=" + taxNumber + "     Phone Number=" + phoneNumber + "     Email=" + email + "     Address=" + address;
-    }
 }

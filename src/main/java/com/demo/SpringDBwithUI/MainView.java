@@ -27,7 +27,7 @@ import java.util.Collection;
 @PageTitle("Home | P&I Demo")
 public class MainView extends VerticalLayout {
 
-    private final ProductEditor editor;
+    private final ProductEditor productEditor;
     private final DataService dataService;
 
     private final Grid<Product> grid;
@@ -47,33 +47,30 @@ public class MainView extends VerticalLayout {
 
         this.dataService = dataService;
 
-        this.editor = new ProductEditor(dataService);
+        this.productEditor = new ProductEditor(dataService);
         this.grid = new Grid<>(Product.class);
         this.filter = new TextField();
         this.addNewBtn = new Button("New product", VaadinIcon.PLUS.create());
-        this.toggleDarkModeBtn = new Button("Toggle dark mode");
-        this.companySelector = new ComboBox<>();
+        this.toggleDarkModeBtn = new Button("Toggle dark mode", this::toggleDarkMode);
+        this.companySelector = new ComboBox<>(this::selectCompany);
         this.header = new H1("Products Database");
-        //this.companyInfo = new H3();
         this.companyInfo = new Grid<>(Company.class);
         this.addNewCompanyBtn = new Button("New company");
 
 
-        // build layout
+        // Build layout
         VerticalLayout headerLayout = new VerticalLayout(toggleDarkModeBtn,header);
         headerLayout.setAlignSelf(Alignment.END, toggleDarkModeBtn);
         headerLayout.setAlignSelf(Alignment.CENTER, header);
         headerLayout.setSpacing(false);
 
-
-
         HorizontalLayout actions = new HorizontalLayout(filter, addNewBtn);
 
-        HorizontalLayout gridAndEditor = new HorizontalLayout(grid, editor);
+        HorizontalLayout gridAndEditor = new HorizontalLayout(grid, productEditor);
         gridAndEditor.setFlexGrow(3,grid);
-        gridAndEditor.setFlexGrow(1,editor);
+        gridAndEditor.setFlexGrow(1,productEditor);
         gridAndEditor.setSizeFull();
-        editor.setWidth(20,Unit.PERCENTAGE);
+        productEditor.setWidth(20,Unit.PERCENTAGE);
 
         add(headerLayout,companySelector, companyInfo, actions,gridAndEditor);
 
@@ -81,7 +78,7 @@ public class MainView extends VerticalLayout {
 
     }
 
-    private void toggleDarkMode() {
+    private void toggleDarkMode(ClickEvent<Button> event) {
         ThemeList themeList = UI.getCurrent().getElement().getThemeList();
         if (themeList.contains(Lumo.DARK)) {
             themeList.remove(Lumo.DARK);
@@ -92,6 +89,18 @@ public class MainView extends VerticalLayout {
 
     private void listProductsInGrid(String filterText, Company company) {
         grid.setItems(dataService.findAllProducts(filterText,company));
+    }
+
+    private void selectCompany(AbstractField.ComponentValueChangeEvent<ComboBox<Company>,Company> event) {
+        if (companySelector.isEmpty()) {
+            companyInfo.setItems(new ArrayList<>());
+            companyInfo.setVisible(false);
+        }
+        else {
+            companyInfo.setItems(event.getValue());
+            companyInfo.setVisible(true);
+        }
+        listProductsInGrid(filter.getValue(), event.getValue());
     }
 
     private void configureUIElements() {
@@ -106,23 +115,18 @@ public class MainView extends VerticalLayout {
         grid.getColumnByKey("weight").setHeader("Weight (gr)");
 
         filter.setPlaceholder("Filter by product name");
+
         companySelector.setPlaceholder("Filter by company");
         companySelector.setItems(dataService.findAllCompanies());
         companySelector.setItemLabelGenerator(Company::getCompany);
         companySelector.setClearButtonVisible(true);
-        //companyInfo.setReadOnly(true);
-        //companyInfo.setWidthFull();
-        /*
-        companyInfo.setWhiteSpace(HasText.WhiteSpace.PRE);
-        companySelector.addValueChangeListener(e -> {
-            if (companySelector.isEmpty()) companyInfo.setText("");
-            else companyInfo.setText(e.getValue().toHtml());
-        });
 
-         */
         companyInfo.setColumns("company", "taxNumber", "phoneNumber", "email", "address");
         companyInfo.setAllRowsVisible(true);
         companyInfo.setVisible(false);
+
+        /*
+        Lambda function too long, so added ComponentValueChangeEvent handler to constructor of ComboBox
         companySelector.addValueChangeListener(e -> {
             if (companySelector.isEmpty()) {
                 companyInfo.setItems(new ArrayList<>());
@@ -134,6 +138,7 @@ public class MainView extends VerticalLayout {
             }
             listProductsInGrid(filter.getValue(), e.getValue());
         });
+         */
 
         // Hook logic to components
 
@@ -142,22 +147,31 @@ public class MainView extends VerticalLayout {
         filter.addValueChangeListener(e -> listProductsInGrid(e.getValue(), companySelector.getValue()));
 
         // Connect selected Product to editor or hide if none is selected
-        grid.asSingleSelect().addValueChangeListener(e -> {
-            editor.editProduct(e.getValue());
-        });
+        grid.asSingleSelect().addValueChangeListener(e -> productEditor.editProduct(e.getValue()));
+        //grid.addItemClickListener(e -> productEditor.editProduct(e.getItem()));
 
         // Instantiate and edit new Customer the new button is clicked
-        addNewBtn.addClickListener(e -> editor.editProduct(new Product()));
-        toggleDarkModeBtn.addClickListener(e -> toggleDarkMode());
+        addNewBtn.addClickListener(e -> {
+            grid.asSingleSelect().clear();
+            productEditor.editProduct(new Product());
 
+        });
 
         // Listen changes made by the editor, refresh data from backend
-        editor.setChangeHandler(() -> {
-            editor.setVisible(false);
-            listProductsInGrid(filter.getValue(), companySelector.getValue());
-        });
+        //productEditor.
+        productEditor.setChangeHandler(this::onEditorChange);
+
+
 
         // Initialize listing
         listProductsInGrid(null, null);
     }
+
+    private void onEditorChange() {
+        productEditor.setVisible(false);
+        grid.asSingleSelect().clear();
+        listProductsInGrid(filter.getValue(), companySelector.getValue());
+    }
+
+
 }

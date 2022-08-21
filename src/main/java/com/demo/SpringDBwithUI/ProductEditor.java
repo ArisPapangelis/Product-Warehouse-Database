@@ -31,35 +31,48 @@ public class ProductEditor extends FormLayout implements KeyNotifier {
      * The currently edited product
      */
     private Product product;
+
     /* Fields to edit properties in Product entity */
-    TextField name = new TextField("Name");
-    NumberField weight = new NumberField("Weight (gr)");
-    TextField availability = new TextField("Availability");
-    NumberField price = new NumberField("Price (EUR)");
-    TextField category = new TextField("Category");
-    TextField description = new TextField("Description");
-    ComboBox<Company> company = new ComboBox<>("Company");
+    private final TextField name;
+    private final NumberField weight;
+    private final TextField availability;
+    private final NumberField price;
+    private final TextField category;
+    private final TextField description;
+    private final ComboBox<Company> company;
 
+    // Action buttons
+    Button save;
+    Button delete;
+    Button cancel;
 
-
-    /* Action buttons */
-    // TODO why more code?
-    Button save = new Button("Save", VaadinIcon.CHECK.create());
-    Button delete = new Button("Delete", VaadinIcon.TRASH.create());
-    Button cancel = new Button("Cancel");
-
-    HorizontalLayout actions = new HorizontalLayout(save, delete, cancel);
-
-    Binder<Product> binder = new Binder<>(Product.class);
-    //or BeanValidationBinder
+    Binder<Product> binder;
     private ChangeHandler changeHandler;
+    @FunctionalInterface
+    public interface ChangeHandler {
+        void onChange();
+    }
 
     private boolean persisted;
 
     @Autowired
     public ProductEditor(DataService dataService) {
         this.dataService = dataService;
+        this.name = new TextField("Name");
+        this.weight = new NumberField("Weight (gr)");
+        this.availability = new TextField("Availability");
+        this.price = new NumberField("Price (EUR)");
+        this.category = new TextField("Category");
+        this.description =  new TextField("Description");
+        this.company = new ComboBox<>("Company");
+        this.save = new Button("Save", VaadinIcon.CHECK.create());
+        this.delete = new Button("Delete", VaadinIcon.TRASH.create());
+        this.cancel = new Button("Cancel");
+        this.binder = new BeanValidationBinder<>(Product.class);
         reloadCompanyComboBox();
+
+
+        HorizontalLayout actions = new HorizontalLayout(save, delete, cancel);
         add(name, weight, availability, price, category, description, company, actions);
 
         // bind using naming convention
@@ -76,13 +89,16 @@ public class ProductEditor extends FormLayout implements KeyNotifier {
         // wire action buttons to save, delete and reset
         save.addClickListener(e -> save());
         delete.addClickListener(e -> delete());
-        cancel.addClickListener(e -> editProduct(null));
+        cancel.addClickListener(e -> cancel());
+        binder.addStatusChangeListener(e -> save.setEnabled(binder.isValid()));
         setVisible(false);
 
         persisted = false;
     }
 
-    void delete() {
+
+
+    private void delete() {
         Notification notification;
         if (dataService.deleteProduct(product)){
             notification = Notification.show("Successfully deleted product", 3000, Notification.Position.BOTTOM_START);
@@ -95,7 +111,7 @@ public class ProductEditor extends FormLayout implements KeyNotifier {
         changeHandler.onChange();
     }
 
-    void save() {
+    private void save() {
         Notification notification;
         if (persisted) {
             if (dataService.updateProduct(product)) {
@@ -120,11 +136,13 @@ public class ProductEditor extends FormLayout implements KeyNotifier {
         changeHandler.onChange();
     }
 
-    public interface ChangeHandler {
-        void onChange();
+    private void cancel() {
+        editProduct(null);
+        changeHandler.onChange();
     }
 
-    public final void editProduct(Product p) {
+
+    public void editProduct(Product p) {
         if (p == null) {
             setVisible(false);
             return;
@@ -156,7 +174,7 @@ public class ProductEditor extends FormLayout implements KeyNotifier {
         changeHandler = h;
     }
 
-    public void reloadCompanyComboBox() {
+    private void reloadCompanyComboBox() {
         company.setItems(dataService.findAllCompanies());
         company.setItemLabelGenerator(Company::getCompany);
     }
