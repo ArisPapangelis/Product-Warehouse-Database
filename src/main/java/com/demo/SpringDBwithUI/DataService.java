@@ -1,7 +1,10 @@
 package com.demo.SpringDBwithUI;
 
 import org.apache.commons.lang3.StringUtils;
+import org.hibernate.Criteria;
+import org.hibernate.Hibernate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collection;
 import java.util.List;
@@ -23,7 +26,7 @@ public class DataService {
             return (List<Product>) productRepository.findAll();
         }
         else if (company != null && filterText  != null) {
-            return productRepository.findByNameStartsWithIgnoreCaseAndCompanyId(filterText, company.getId());
+            return productRepository.findByNameStartsWithIgnoreCaseAndCompany(filterText, company);
         }
         else if (filterText == null) {
             return productRepository.findByCompanyId(company.getId());
@@ -51,7 +54,8 @@ public class DataService {
             System.err.println("Product is null, cannot save product");
             return false;
         }
-        if (productRepository.findByNameAndWeight(product.getName(), product.getWeight()).isPresent()) {
+        Optional<Product> p = productRepository.findByNameIgnoreCaseAndWeightAndCompany(product.getName(), product.getWeight(), product.getCompany());
+        if (p.isPresent() && p.get().getCompany().getCompany().equalsIgnoreCase(product.getCompany().getCompany())) {
             System.err.println("Product already exists, cannot save product");
             return false;
         }
@@ -64,8 +68,9 @@ public class DataService {
             System.err.println("Product is null, cannot save product");
             return false;
         }
-        Optional<Product> p = productRepository.findByNameAndWeight(product.getName(), product.getWeight());
-        if (p.isPresent() && p.get().getId()!= product.getId()) {
+        Optional<Product> p = productRepository.findByNameIgnoreCaseAndWeightAndCompany(product.getName(), product.getWeight(), product.getCompany());
+
+        if (p.isPresent() && p.get().getId()!= product.getId() && p.get().getCompany().getCompany().equalsIgnoreCase(product.getCompany().getCompany())) {
             System.err.println("Product already exists in the given quantity, cannot save product");
             return false;
         }
@@ -75,6 +80,10 @@ public class DataService {
 
     public List<Company> findAllCompanies() {
         return (List<Company>) companyRepository.findAll();
+    }
+
+    public Company findCompanyByName(String name) {
+        return companyRepository.findByCompany(name).get();
     }
 
     public boolean deleteCompany(Company company) {
@@ -99,4 +108,7 @@ public class DataService {
         return true;
     }
 
+    public int countCompanyProducts(Company company) {
+        return productRepository.countProductsByCompany(company);
+    }
 }

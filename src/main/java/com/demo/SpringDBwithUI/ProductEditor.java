@@ -105,7 +105,7 @@ public class ProductEditor extends FormLayout implements KeyNotifier {
             notification.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
         }
         else {
-            notification = Notification.show("There was an error, could not delete product", 3000, Notification.Position.BOTTOM_START);
+            notification = Notification.show("Product does not exist, could not delete product", 3000, Notification.Position.BOTTOM_START);
             notification.addThemeVariants(NotificationVariant.LUMO_ERROR);
         }
         changeHandler.onChange();
@@ -113,23 +113,26 @@ public class ProductEditor extends FormLayout implements KeyNotifier {
 
     private void save() {
         Notification notification;
+        boolean status;
         if (persisted) {
-            if (dataService.updateProduct(product)) {
+            status = dataService.updateProduct(product);
+            if (status) {
                 notification = Notification.show("Successfully updated product", 3000, Notification.Position.BOTTOM_START);
                 notification.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
             }
             else {
-                notification = Notification.show("There was an error, could not update product", 3000, Notification.Position.BOTTOM_START);
+                notification = Notification.show("Product already exists in the given quantity, cannot update product", 3000, Notification.Position.BOTTOM_START);
                 notification.addThemeVariants(NotificationVariant.LUMO_ERROR);
             }
         }
         else {
-            if (dataService.saveProduct(product)) {
+            status = dataService.saveProduct(product);
+            if (status) {
                 notification = Notification.show("Successfully saved new product", 3000, Notification.Position.BOTTOM_START);
                 notification.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
             }
             else {
-                notification = Notification.show("There was an error, could not save new product", 3000, Notification.Position.BOTTOM_START);
+                notification = Notification.show("Product already exists, cannot save product", 3000, Notification.Position.BOTTOM_START);
                 notification.addThemeVariants(NotificationVariant.LUMO_ERROR);
             }
         }

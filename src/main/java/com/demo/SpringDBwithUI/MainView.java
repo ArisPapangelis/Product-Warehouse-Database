@@ -14,14 +14,17 @@ import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.dom.ThemeList;
+import com.vaadin.flow.router.HighlightConditions;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.router.RouterLink;
 import com.vaadin.flow.theme.lumo.Lumo;
 import org.apache.commons.lang3.StringUtils;
 
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 @Route("app")
 @PageTitle("Home | P&I Demo")
@@ -40,6 +43,7 @@ public class MainView extends VerticalLayout {
     private final H1 header;
     //private H3 companyInfo;
     private final Grid<Company> companyInfo;
+    private final RouterLink companiesLink;
 
     public MainView(DataService dataService) {
         addClassName("main-view");
@@ -51,11 +55,12 @@ public class MainView extends VerticalLayout {
         this.grid = new Grid<>(Product.class);
         this.filter = new TextField();
         this.addNewBtn = new Button("New product", VaadinIcon.PLUS.create());
-        this.toggleDarkModeBtn = new Button("Toggle dark mode", this::toggleDarkMode);
+        this.toggleDarkModeBtn = new Button("Toggle dark mode", MainView::toggleDarkMode);
         this.companySelector = new ComboBox<>(this::selectCompany);
         this.header = new H1("Products Database");
         this.companyInfo = new Grid<>(Company.class);
         this.addNewCompanyBtn = new Button("New company");
+        this.companiesLink = new RouterLink("Full list of companies", CompaniesView.class);
 
 
         // Build layout
@@ -63,6 +68,9 @@ public class MainView extends VerticalLayout {
         headerLayout.setAlignSelf(Alignment.END, toggleDarkModeBtn);
         headerLayout.setAlignSelf(Alignment.CENTER, header);
         headerLayout.setSpacing(false);
+
+        HorizontalLayout companies = new HorizontalLayout(companySelector, companiesLink);
+        companies.setDefaultVerticalComponentAlignment(Alignment.CENTER);
 
         HorizontalLayout actions = new HorizontalLayout(filter, addNewBtn);
 
@@ -72,13 +80,13 @@ public class MainView extends VerticalLayout {
         gridAndEditor.setSizeFull();
         productEditor.setWidth(20,Unit.PERCENTAGE);
 
-        add(headerLayout,companySelector, companyInfo, actions,gridAndEditor);
+        add(headerLayout,companies, companyInfo, actions,gridAndEditor);
 
         configureUIElements();
 
     }
 
-    private void toggleDarkMode(ClickEvent<Button> event) {
+    public static void toggleDarkMode(ClickEvent<Button> event) {
         ThemeList themeList = UI.getCurrent().getElement().getThemeList();
         if (themeList.contains(Lumo.DARK)) {
             themeList.remove(Lumo.DARK);
@@ -88,7 +96,9 @@ public class MainView extends VerticalLayout {
     }
 
     private void listProductsInGrid(String filterText, Company company) {
-        grid.setItems(dataService.findAllProducts(filterText,company));
+        List<Product> gridItems = dataService.findAllProducts(filterText,company);
+        grid.setItems(gridItems);
+        //numberOfProducts = gridItems.size();
     }
 
     private void selectCompany(AbstractField.ComponentValueChangeEvent<ComboBox<Company>,Company> event) {
@@ -120,6 +130,8 @@ public class MainView extends VerticalLayout {
         companySelector.setItems(dataService.findAllCompanies());
         companySelector.setItemLabelGenerator(Company::getCompany);
         companySelector.setClearButtonVisible(true);
+
+        companiesLink.setHighlightCondition(HighlightConditions.sameLocation());
 
         companyInfo.setColumns("company", "taxNumber", "phoneNumber", "email", "address");
         companyInfo.setAllRowsVisible(true);
@@ -154,12 +166,12 @@ public class MainView extends VerticalLayout {
         addNewBtn.addClickListener(e -> {
             grid.asSingleSelect().clear();
             productEditor.editProduct(new Product());
-
         });
 
         // Listen changes made by the editor, refresh data from backend
         //productEditor.
         productEditor.setChangeHandler(this::onEditorChange);
+
 
 
 

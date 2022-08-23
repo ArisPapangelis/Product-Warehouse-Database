@@ -1,6 +1,8 @@
 package com.demo.SpringDBwithUI;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import org.hibernate.annotations.Formula;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.*;
 import javax.validation.constraints.Email;
@@ -28,11 +30,9 @@ public class Company {
     @NotBlank(message = "Field can't be empty")
     private String address;
 
-    @OneToMany(mappedBy = "company")
+    @OneToMany(mappedBy = "company", fetch = FetchType.LAZY)
     @JsonIgnoreProperties({"company"})
     private List<Product> products;
-
-
 
     public Company() {
     }
@@ -111,5 +111,6 @@ public class Company {
     public void setProducts(List<Product> products) {
         this.products = products;
     }
+
 
 }
