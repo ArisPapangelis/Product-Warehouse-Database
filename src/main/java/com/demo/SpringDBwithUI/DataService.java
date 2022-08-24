@@ -82,8 +82,8 @@ public class DataService {
         return (List<Company>) companyRepository.findAll();
     }
 
-    public Company findCompanyByName(String name) {
-        return companyRepository.findByCompany(name).get();
+    public Optional <Company> findCompanyByName(String name) {
+        return companyRepository.findByCompany(name);
     }
 
     public boolean deleteCompany(Company company) {

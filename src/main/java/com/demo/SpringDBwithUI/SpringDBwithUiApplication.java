@@ -18,12 +18,11 @@ import java.util.Optional;
 @Theme(themeClass = Lumo.class, variant = Lumo.LIGHT)
 public class SpringDBwithUiApplication implements CommandLineRunner, AppShellConfigurator {
 
-	private final ProductRepository repository;
+
 	private final DataService dataService;
 
 	private static final Logger log = LoggerFactory.getLogger(SpringDBwithUiApplication.class);
-	public SpringDBwithUiApplication(DataService dataService, ProductRepository repository) {
-		this.repository = repository;
+	public SpringDBwithUiApplication(DataService dataService) {
 		this.dataService = dataService;
 	}
 
@@ -57,6 +56,7 @@ public class SpringDBwithUiApplication implements CommandLineRunner, AppShellCon
 		company = new Company("OliveSpring", 121503653L, "6948352325", "info@olivespring.gr", "Leoforos Dodonis 46");
 		dataService.saveCompany(company);
 
+		/*
 
 		// fetch all products
 		log.info("Products found with findAll():");
@@ -74,18 +74,11 @@ public class SpringDBwithUiApplication implements CommandLineRunner, AppShellCon
 		}
 		log.info("");
 
+		 */
+
 
 
 	}
 
-
-	/*
-
-	@GetMapping("/hello")
-	public String hello(@RequestParam(value = "name", defaultValue = "World") String name) {
-		return String.format("Hello %s!", name);
-	}
-
-	 */
 
 }

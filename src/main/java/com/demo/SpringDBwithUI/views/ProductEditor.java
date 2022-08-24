@@ -1,5 +1,8 @@
-package com.demo.SpringDBwithUI;
+package com.demo.SpringDBwithUI.views;
 
+import com.demo.SpringDBwithUI.Company;
+import com.demo.SpringDBwithUI.DataService;
+import com.demo.SpringDBwithUI.Product;
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.KeyNotifier;
 import com.vaadin.flow.component.button.Button;

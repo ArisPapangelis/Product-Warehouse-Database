@@ -1,18 +1,15 @@
-package com.demo.SpringDBwithUI;
+package com.demo.SpringDBwithUI.views;
 
-import com.vaadin.flow.component.Unit;
+import com.demo.SpringDBwithUI.Company;
+import com.demo.SpringDBwithUI.DataService;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.H1;
-import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.HighlightConditions;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouterLink;
-import org.hibernate.Hibernate;
 
 @Route("app/companies")
 @PageTitle("Companies | P&I Demo")
