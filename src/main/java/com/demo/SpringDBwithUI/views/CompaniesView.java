@@ -44,9 +44,9 @@ public class CompaniesView extends VerticalLayout {
         add(headerLayout, companyGrid);
 
         companyGrid.setSizeFull();
-        companyGrid.setColumns("id", "company", "taxNumber", "phoneNumber", "email", "address");
+        companyGrid.setColumns("company", "taxNumber", "phoneNumber", "email", "address");
         companyGrid.addColumn(dataService::countCompanyProducts).setHeader("Number of products");
-        companyGrid.getColumnByKey("id").setWidth("50px").setFlexGrow(0);
+        //companyGrid.getColumnByKey("id").setWidth("50px").setFlexGrow(0);
 
         companyGrid.setItems(dataService.findAllCompanies());
         productsLink.setHighlightCondition(HighlightConditions.sameLocation());

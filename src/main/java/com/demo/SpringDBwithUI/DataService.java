@@ -50,10 +50,7 @@ public class DataService {
     }
 
     public boolean saveProduct(Product product) {
-        if (product == null) {
-            System.err.println("Product is null, cannot save product");
-            return false;
-        }
+
         Optional<Product> p = productRepository.findByNameIgnoreCaseAndWeightAndCompany(product.getName(), product.getWeight(), product.getCompany());
         if (p.isPresent() && p.get().getCompany().getCompany().equalsIgnoreCase(product.getCompany().getCompany())) {
             System.err.println("Product already exists, cannot save product");
@@ -64,12 +61,8 @@ public class DataService {
     }
 
     public boolean updateProduct(Product product) {
-        if (product == null) {
-            System.err.println("Product is null, cannot save product");
-            return false;
-        }
-        Optional<Product> p = productRepository.findByNameIgnoreCaseAndWeightAndCompany(product.getName(), product.getWeight(), product.getCompany());
 
+        Optional<Product> p = productRepository.findByNameIgnoreCaseAndWeightAndCompany(product.getName(), product.getWeight(), product.getCompany());
         if (p.isPresent() && p.get().getId()!= product.getId() && p.get().getCompany().getCompany().equalsIgnoreCase(product.getCompany().getCompany())) {
             System.err.println("Product already exists in the given quantity, cannot save product");
             return false;
@@ -83,11 +76,11 @@ public class DataService {
     }
 
     public Optional <Company> findCompanyByName(String name) {
-        return companyRepository.findByCompany(name);
+        return companyRepository.findByCompanyIgnoreCase(name);
     }
 
     public boolean deleteCompany(Company company) {
-        if (companyRepository.findByCompany(company.getCompany()).isEmpty()) {
+        if (companyRepository.findById(company.getId()).isEmpty()) {
             System.err.println("Company does not exist");
             return false;
         }
@@ -96,11 +89,7 @@ public class DataService {
     }
 
     public boolean saveCompany(Company company) {
-        if (company == null) {
-            System.err.println("Company is null, cannot save company");
-            return false;
-        }
-        else if (companyRepository.findByCompany(company.getCompany()).isPresent()) {
+        if (companyRepository.findByCompanyIgnoreCase(company.getCompany()).isPresent()) {
             System.err.println("Company already exists");
             return false;
         }

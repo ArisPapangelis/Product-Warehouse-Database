@@ -7,6 +7,6 @@ import java.util.Optional;
 
 public interface CompanyRepository extends CrudRepository<Company, Long> {
 
-    Optional<Company> findByCompany(String company);
+    Optional<Company> findByCompanyIgnoreCase(String company);
 
 }

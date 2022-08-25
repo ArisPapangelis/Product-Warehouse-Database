@@ -24,6 +24,12 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
         return handleExceptionInternal(ex, bodyOfResponse, new HttpHeaders(), HttpStatus.NOT_FOUND, request);
     }
 
+    @ExceptionHandler(value = DuplicateEntryException.class)
+    protected ResponseEntity<Object> handleDuplicateEntry(DuplicateEntryException ex, WebRequest request) {
+        ApiError bodyOfResponse = new ApiError(LocalDateTime.now().toString(), HttpStatus.CONFLICT, ex.toString(), "The requested object already exists in the database");
+        return handleExceptionInternal(ex, bodyOfResponse, new HttpHeaders(), HttpStatus.CONFLICT, request);
+    }
+
 
     @Override
     //@ExceptionHandler(value = HttpRequestMethodNotSupportedException.class)

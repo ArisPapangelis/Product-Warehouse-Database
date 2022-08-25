@@ -21,7 +21,46 @@ public class ApiController {
         this.dataService = dataService;
     }
 
-    @PostMapping(path="/products/add") // Map ONLY POST Requests
+    @GetMapping(path="/products")
+    public Iterable<Product> getAllProducts() {
+        // This returns a JSON or XML with the users
+        return dataService.findAllProducts(null, null);
+    }
+
+    @GetMapping(value = "/products/{id}")
+    public Product findById(@PathVariable("id") Long id) {
+        return dataService.findProductByID(id).get();
+    }
+
+    @PutMapping(value = "/products/{id}")
+    public Product updateById(@PathVariable("id") Long id, @RequestParam String name
+            , @RequestParam Double weight, @RequestParam String availability
+            , @RequestParam Double price, @RequestParam String category
+            , @RequestParam String description, @RequestParam String company) {
+
+        Product product = dataService.findProductByID(id).get();
+        product.setName(name);
+        product.setWeight(weight);
+        product.setAvailability(availability);
+        product.setPrice(price);
+        product.setCategory(category);
+        product.setDescription(description);
+
+        Optional <Company> c = dataService.findCompanyByName(company);
+        if (c.isPresent()) {
+            product.setCompany(c.get());
+        }
+        else {
+            throw new NoSuchElementException("Company does not exist in database, try one of the available companies");
+        }
+
+        dataService.updateProduct(product);
+        return product;
+    }
+
+
+    @PostMapping(path="/products", produces = "application/json") // Map ONLY POST Requests
+    @ResponseStatus(value = HttpStatus.CREATED)
     public String addNewProduct (@RequestParam String name
             , @RequestParam Double weight, @RequestParam String availability
             , @RequestParam Double price, @RequestParam String category
@@ -41,53 +80,28 @@ public class ApiController {
             p.setCompany(c.get());
         }
         else {
-            throw new NoSuchElementException("Company does not exist in database");
+            throw new NoSuchElementException("Company does not exist in database, try one of the available companies");
         }
 
         dataService.saveProduct(p);
-        return "{\"status\": \"Successfully saved new user\"}";
+        return "{\"status\": \"Successfully saved new product\"}";
         //Sample Post: curl localhost:8080/app/add -d name=Chamomile -d weight=20.0 -d availability=Unavailable -d price=2.7 -d category=Monovarietal -d description=100%25%20organic%20chamomile%20from%20the%20mountains%20of%20Epirus
         //http://localhost:8080/api/products/add?name=Dorida&weight=30&availability=Unavailable&price=2.7&category=Herbs&description=100%25%20organic%20herbal%20blend%20from%20the%20mountains%20of%20Epirus&company=Myrtali%20Organics
     }
 
-    @GetMapping(path="/products")
-    public Iterable<Product> getAllProducts() {
-        // This returns a JSON or XML with the users
-        return dataService.findAllProducts(null, null);
+
+
+
+    /*
+
+    @PostMapping(path="/products/add") // Map ONLY POST Requests
+    public String addNewProduct(@RequestBody Product p) {
+        dataService.saveProduct(p);
+        return "{\"status\": \"Successfully saved new product\"}";
     }
 
-    @GetMapping(value = "/products/{id}")
-    public Product findById(@PathVariable("id") Long id) {
-        Product p = dataService.findProductByID(id).get();
-        return p;
-    }
+    */
 
-    @PutMapping(value = "/products/{id}")
-    public Product patchById(@PathVariable("id") Long id, @RequestParam String name
-            , @RequestParam Double weight, @RequestParam String availability
-            , @RequestParam Double price, @RequestParam String category
-            , @RequestParam String description, @RequestParam String company) {
-        Product p = dataService.findProductByID(id).get();
-        p.setName(name);
-        p.setWeight(weight);
-        p.setAvailability(availability);
-        p.setPrice(price);
-        p.setCategory(category);
-        p.setDescription(description);
-        Optional <Company> c = dataService.findCompanyByName(company);
-        p.setCompany(c.get());
-        /*
-        if (c.isPresent()) {
-            p.setCompany(c.get());
-        }
-        else {
-            throw new NoSuchElementException("Company does not exist in database");
-        }
-
-         */
-        dataService.updateProduct(p);
-        return p;
-    }
     @GetMapping(path="/companies")
     public Iterable<Company> getAllCompanies() {
         // This returns a JSON or XML with the users

@@ -115,9 +115,9 @@ public class MainView extends VerticalLayout {
         //Configure grid
         //grid.setHeight("500px");
         grid.setSizeFull();
-        grid.setColumns("id", "name", "weight", "availability", "price", "category", "description");
+        grid.setColumns("name", "weight", "availability", "price", "category", "description");
         grid.addColumn(product -> product.getCompany().getCompany()).setHeader("Company");
-        grid.getColumnByKey("id").setWidth("50px").setFlexGrow(0);
+        //grid.getColumnByKey("id").setWidth("50px").setFlexGrow(0);
         grid.getColumnByKey("description").setFlexGrow(2);
         grid.getColumnByKey("price").setHeader("Price (EUR)");
         grid.getColumnByKey("weight").setHeader("Weight (gr)");
