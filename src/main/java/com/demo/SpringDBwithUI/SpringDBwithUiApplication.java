@@ -1,6 +1,7 @@
 package com.demo.SpringDBwithUI;
 
 import com.vaadin.flow.component.page.AppShellConfigurator;
+import com.vaadin.flow.component.page.Push;
 import com.vaadin.flow.theme.Theme;
 import com.vaadin.flow.theme.lumo.Lumo;
 import org.slf4j.Logger;
@@ -16,6 +17,7 @@ import java.util.Optional;
 @SpringBootApplication
 @RestController
 @Theme(themeClass = Lumo.class, variant = Lumo.LIGHT)
+@Push
 public class SpringDBwithUiApplication implements CommandLineRunner, AppShellConfigurator {
 
 

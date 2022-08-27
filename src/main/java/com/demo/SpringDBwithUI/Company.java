@@ -30,7 +30,7 @@ public class Company {
     @NotBlank(message = "Field can't be empty")
     private String address;
 
-    @OneToMany(mappedBy = "company", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "company", fetch = FetchType.LAZY, orphanRemoval = true) //or cascade = CascadeType.REMOVE
     @JsonIgnoreProperties({"company"})
     private List<Product> products;
 

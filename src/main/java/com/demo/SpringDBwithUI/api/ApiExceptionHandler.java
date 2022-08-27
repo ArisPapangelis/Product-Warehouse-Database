@@ -3,6 +3,7 @@ package com.demo.SpringDBwithUI.api;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -12,6 +13,7 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import javax.validation.ConstraintViolationException;
+import java.sql.SQLIntegrityConstraintViolationException;
 import java.time.LocalDateTime;
 import java.util.NoSuchElementException;
 
@@ -51,10 +53,15 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
         return handleExceptionInternal(ex, bodyOfResponse, new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
     }
 
-    @ExceptionHandler(value = ConstraintViolationException.class)
-    protected ResponseEntity<Object> handleConstraintViolation(ConstraintViolationException ex, WebRequest request) {
-        ApiError bodyOfResponse = new ApiError(LocalDateTime.now().toString(), HttpStatus.BAD_REQUEST, ex.toString(), "The selected values for the parameters violate database constraints");
+    @ExceptionHandler(value = { ConstraintViolationException.class, SQLIntegrityConstraintViolationException.class })
+    protected ResponseEntity<Object> handleConstraintViolation(RuntimeException ex, WebRequest request) {
+        ApiError bodyOfResponse = new ApiError(LocalDateTime.now().toString(), HttpStatus.BAD_REQUEST, ex.toString(), "The selected values for the attributes violate database constraints");
         return handleExceptionInternal(ex, bodyOfResponse, new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
     }
 
+    @Override
+    protected ResponseEntity<Object> handleHttpMessageNotReadable(HttpMessageNotReadableException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
+        ApiError bodyOfResponse = new ApiError(LocalDateTime.now().toString(), HttpStatus.BAD_REQUEST, ex.toString(), "The type of the request body attributes is different than expected");
+        return handleExceptionInternal(ex, bodyOfResponse, new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
+    }
 }

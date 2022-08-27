@@ -116,10 +116,10 @@ public class ProductEditor extends FormLayout implements KeyNotifier {
 
     private void save() {
         Notification notification;
-        boolean status;
+        Product p;
         if (persisted) {
-            status = dataService.updateProduct(product);
-            if (status) {
+            p = dataService.updateProduct(product);
+            if (p!=null) {
                 notification = Notification.show("Successfully updated product", 3000, Notification.Position.BOTTOM_START);
                 notification.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
             }
@@ -129,8 +129,8 @@ public class ProductEditor extends FormLayout implements KeyNotifier {
             }
         }
         else {
-            status = dataService.saveProduct(product);
-            if (status) {
+            p = dataService.saveProduct(product);
+            if (p!=null) {
                 notification = Notification.show("Successfully saved new product", 3000, Notification.Position.BOTTOM_START);
                 notification.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
             }
@@ -180,7 +180,7 @@ public class ProductEditor extends FormLayout implements KeyNotifier {
         changeHandler = h;
     }
 
-    private void reloadCompanyComboBox() {
+    public void reloadCompanyComboBox() {
         company.setItems(dataService.findAllCompanies());
         company.setItemLabelGenerator(Company::getCompany);
     }

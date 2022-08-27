@@ -1,18 +1,14 @@
 package com.demo.SpringDBwithUI;
 
-import org.apache.commons.lang3.StringUtils;
-import org.hibernate.Criteria;
-import org.hibernate.Hibernate;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
 @Service
 public class DataService {
 
+    //TODO Change return type of saveProduct and updateProduct
     private final ProductRepository productRepository;
     private final CompanyRepository companyRepository;
 
@@ -49,35 +45,39 @@ public class DataService {
         return true;
     }
 
-    public boolean saveProduct(Product product) {
+    public Product saveProduct(Product product) {
 
         Optional<Product> p = productRepository.findByNameIgnoreCaseAndWeightAndCompany(product.getName(), product.getWeight(), product.getCompany());
         if (p.isPresent() && p.get().getCompany().getCompany().equalsIgnoreCase(product.getCompany().getCompany())) {
             System.err.println("Product already exists, cannot save product");
-            return false;
+            return null;
         }
-        productRepository.save(product);
-        return true;
+        return productRepository.save(product);
     }
 
-    public boolean updateProduct(Product product) {
+    public Product updateProduct(Product product) {
 
         Optional<Product> p = productRepository.findByNameIgnoreCaseAndWeightAndCompany(product.getName(), product.getWeight(), product.getCompany());
         if (p.isPresent() && p.get().getId()!= product.getId() && p.get().getCompany().getCompany().equalsIgnoreCase(product.getCompany().getCompany())) {
             System.err.println("Product already exists in the given quantity, cannot save product");
-            return false;
+            return null;
         }
-        productRepository.save(product);
-        return true;
+        return productRepository.save(product);
     }
 
     public List<Company> findAllCompanies() {
         return (List<Company>) companyRepository.findAll();
     }
 
+    public Optional<Company> findCompanyById(Long id) {
+        return companyRepository.findById(id);
+    }
+
     public Optional <Company> findCompanyByName(String name) {
         return companyRepository.findByCompanyIgnoreCase(name);
     }
+
+
 
     public boolean deleteCompany(Company company) {
         if (companyRepository.findById(company.getId()).isEmpty()) {
@@ -88,13 +88,22 @@ public class DataService {
         return true;
     }
 
-    public boolean saveCompany(Company company) {
-        if (companyRepository.findByCompanyIgnoreCase(company.getCompany()).isPresent()) {
-            System.err.println("Company already exists");
-            return false;
+    public Company saveCompany(Company company) {
+        Optional<Company> c = companyRepository.findByCompanyIgnoreCase(company.getCompany());
+        if (c.isPresent()) {
+            System.err.println("Company already exists, cannot save company");
+            return null;
         }
-        companyRepository.save(company);
-        return true;
+        return companyRepository.save(company);
+    }
+
+    public Company updateCompany(Company company) {
+        Optional<Company> c = companyRepository.findByCompanyIgnoreCase(company.getCompany());
+        if (c.isPresent() && c.get().getId()!= company.getId()) {
+            System.err.println("Company already exists, cannot update company");
+            return null;
+        }
+        return companyRepository.save(company);
     }
 
     public int countCompanyProducts(Company company) {

@@ -8,6 +8,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.servlet.http.HttpServletResponse;
+import java.util.Collections;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
@@ -21,90 +23,134 @@ public class ApiController {
         this.dataService = dataService;
     }
 
+    //The following mappings are for the Products table
     @GetMapping(path="/products")
-    public Iterable<Product> getAllProducts() {
+    public Iterable<Product> getAllProducts(@RequestParam(required = false) String name,
+                                            @RequestParam(required = false) String company) {
         // This returns a JSON or XML with the users
-        return dataService.findAllProducts(null, null);
+
+        Company c = dataService.findCompanyByName(company).orElse(null);
+        if (company!=null && company.isBlank()) company=null;
+        if (name!=null && name.isBlank()) name=null;
+
+        if (c == null && company != null) throw new NoSuchElementException("The company does not exist in the database");
+
+        List<Product> products = dataService.findAllProducts(name, c);
+        if (products.isEmpty()) throw new NoSuchElementException("No products found meeting query criteria");
+        return products;
     }
 
     @GetMapping(value = "/products/{id}")
-    public Product findById(@PathVariable("id") Long id) {
+    public Product getByProductId(@PathVariable("id") Long id) {
         return dataService.findProductByID(id).get();
     }
 
-    @PutMapping(value = "/products/{id}")
-    public Product updateById(@PathVariable("id") Long id, @RequestParam String name
-            , @RequestParam Double weight, @RequestParam String availability
-            , @RequestParam Double price, @RequestParam String category
-            , @RequestParam String description, @RequestParam String company) {
 
-        Product product = dataService.findProductByID(id).get();
-        product.setName(name);
-        product.setWeight(weight);
-        product.setAvailability(availability);
-        product.setPrice(price);
-        product.setCategory(category);
-        product.setDescription(description);
 
+    @PostMapping(path="/products") // Map ONLY POST Requests
+    @ResponseStatus(value = HttpStatus.CREATED)
+    public Product addNewProduct(@RequestBody Product p) {
+
+        String company = p.getCompany().getCompany();
         Optional <Company> c = dataService.findCompanyByName(company);
-        if (c.isPresent()) {
-            product.setCompany(c.get());
-        }
-        else {
-            throw new NoSuchElementException("Company does not exist in database, try one of the available companies");
-        }
 
-        dataService.updateProduct(product);
+        if (c.isPresent()) p.setCompany(c.get());
+        else throw new NoSuchElementException("Company does not exist in database, try one of the available companies");
+
+        Product product =  dataService.saveProduct(p);
+        if (product==null) throw new DuplicateEntryException("Product already exists in the given quantity, cannot save product");
         return product;
     }
 
 
-    @PostMapping(path="/products", produces = "application/json") // Map ONLY POST Requests
-    @ResponseStatus(value = HttpStatus.CREATED)
-    public String addNewProduct (@RequestParam String name
-            , @RequestParam Double weight, @RequestParam String availability
-            , @RequestParam Double price, @RequestParam String category
-            , @RequestParam String description, @RequestParam String company) {
-        // @ResponseBody means the returned String is the response, not a view name
-        // @RequestParam means it is a parameter from the GET or POST request
+    @PutMapping(path="/products/{id}") // Map ONLY POST Requests
+    public Product updateProductById(@PathVariable("id") Long id, @RequestBody Product p) {
 
-        Product p = new Product();
-        p.setName(name);
-        p.setWeight(weight);
-        p.setAvailability(availability);
-        p.setPrice(price);
-        p.setCategory(category);
-        p.setDescription(description);
+        Product product;
+        String company = p.getCompany().getCompany();
         Optional <Company> c = dataService.findCompanyByName(company);
         if (c.isPresent()) {
-            p.setCompany(c.get());
+            product = dataService.findProductByID(id).map(prod -> {
+                prod.setName(p.getName());
+                prod.setWeight(p.getWeight());
+                prod.setAvailability(p.getAvailability());
+                prod.setPrice(p.getPrice());
+                prod.setCategory(p.getCategory());
+                prod.setDescription(p.getDescription());
+                prod.setCompany((c.get()));
+                return prod;
+            }).get();
         }
         else {
             throw new NoSuchElementException("Company does not exist in database, try one of the available companies");
         }
 
-        dataService.saveProduct(p);
-        return "{\"status\": \"Successfully saved new product\"}";
-        //Sample Post: curl localhost:8080/app/add -d name=Chamomile -d weight=20.0 -d availability=Unavailable -d price=2.7 -d category=Monovarietal -d description=100%25%20organic%20chamomile%20from%20the%20mountains%20of%20Epirus
-        //http://localhost:8080/api/products/add?name=Dorida&weight=30&availability=Unavailable&price=2.7&category=Herbs&description=100%25%20organic%20herbal%20blend%20from%20the%20mountains%20of%20Epirus&company=Myrtali%20Organics
+        product =  dataService.updateProduct(product);
+        if (product==null) throw new DuplicateEntryException("Product already exists in the given quantity, cannot update product");
+        return product;
+    }
+
+    @DeleteMapping(path = "/products/{id}", produces = "application/json")
+    public String deleteProduct(@PathVariable("id") Long id) {
+        dataService.deleteProduct(dataService.findProductByID(id).get());
+        return "\"status\": \"Product deleted successfully\"";
     }
 
 
-
-
-    /*
-
-    @PostMapping(path="/products/add") // Map ONLY POST Requests
-    public String addNewProduct(@RequestBody Product p) {
-        dataService.saveProduct(p);
-        return "{\"status\": \"Successfully saved new product\"}";
-    }
-
-    */
-
+    //The following mappings are for the Companies table
     @GetMapping(path="/companies")
-    public Iterable<Company> getAllCompanies() {
-        // This returns a JSON or XML with the users
-        return dataService.findAllCompanies();
+    public Iterable<Company> getAllCompanies(@RequestParam(required = false) String name) {
+
+        if (name==null || name.isBlank()) {
+            return dataService.findAllCompanies();
+        }
+        Optional<Company> company = dataService.findCompanyByName(name);
+        if (company.isEmpty()) throw new NoSuchElementException("There is no company with the requested name in the database");
+        return List.of(company.get());
     }
+
+    @GetMapping(value = "/companies/{id}")
+    public Company getByCompanyId(@PathVariable("id") Long id) {
+        return dataService.findCompanyById(id).get();
+    }
+
+    @GetMapping(value = "/companies/{id}/productcount", produces = "application/json")
+    public String getCompanyProductCount(@PathVariable("id") Long id) {
+        return String.format("\"Number of products\": \"%d\"", dataService.countCompanyProducts(dataService.findCompanyById(id).get()));
+    }
+
+
+    @PostMapping(path="/companies") // Map ONLY POST Requests
+    @ResponseStatus(value = HttpStatus.CREATED)
+    public Company addNewCompany(@RequestBody Company c) {
+
+        Company company =  dataService.saveCompany(c);
+        if (company==null) throw new DuplicateEntryException("Company already exists in the database, considering updating it with PUT");
+        return company;
+    }
+
+
+    @PutMapping(path="/companies/{id}") // Map ONLY POST Requests
+    public Company updateCompanyById(@PathVariable("id") Long id, @RequestBody Company c) {
+
+        Company company = dataService.findCompanyById(id).map(comp -> {
+            comp.setCompany(c.getCompany());
+            comp.setAddress(c.getAddress());
+            comp.setEmail(c.getEmail());
+            comp.setPhoneNumber(c.getPhoneNumber());
+            comp.setTaxNumber(c.getTaxNumber());
+            return comp;
+        }).get();
+
+        company =  dataService.updateCompany(company);
+        if (company==null) throw new DuplicateEntryException("The requested company name already exists in the database, cannot update company");
+        return company;
+    }
+
+    @DeleteMapping(path = "/companies/{id}", produces = "application/json")
+    public String deleteCompany(@PathVariable("id") Long id) {
+        dataService.deleteCompany(dataService.findCompanyById(id).get());
+        return "\"status\": \"Company deleted successfully\"";
+    }
+
 }

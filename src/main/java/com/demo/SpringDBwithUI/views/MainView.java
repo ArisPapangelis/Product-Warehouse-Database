@@ -11,22 +11,22 @@ import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.page.Push;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.dom.ThemeList;
-import com.vaadin.flow.router.HighlightConditions;
-import com.vaadin.flow.router.PageTitle;
-import com.vaadin.flow.router.Route;
-import com.vaadin.flow.router.RouterLink;
+import com.vaadin.flow.router.*;
 import com.vaadin.flow.theme.lumo.Lumo;
 
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 @Route("app")
 @PageTitle("Home | P&I Demo")
-public class MainView extends VerticalLayout {
+public class MainView extends VerticalLayout implements BeforeLeaveObserver {
 
     private final ProductEditor productEditor;
     private final DataService dataService;
@@ -43,6 +43,9 @@ public class MainView extends VerticalLayout {
     private final Grid<Company> companyInfo;
     private final RouterLink companiesLink;
 
+    private TimerTask updateUI;
+    private ScheduledExecutorService executor;
+    private UI ui;
     public MainView(DataService dataService) {
         addClassName("main-view");
         setSizeFull();
@@ -84,6 +87,27 @@ public class MainView extends VerticalLayout {
 
     }
 
+    @Override
+    protected void onAttach(AttachEvent attachEvent) {
+        super.onAttach(attachEvent);
+
+        ui = attachEvent.getUI();
+        this.updateUI = new TimerTask() {
+            @Override
+            public void run() {
+                ui.access(() -> {
+                    Company company = companySelector.getValue();
+                    companySelector.setItems(dataService.findAllCompanies());
+                    companySelector.setItemLabelGenerator(Company::getCompany);
+                    companySelector.setValue(company);
+                    productEditor.reloadCompanyComboBox();
+                    listProductsInGrid(filter.getValue(), companySelector.getValue());
+                });
+            }
+        };
+        startTimerTask();
+    }
+
     public static void toggleDarkMode(ClickEvent<Button> event) {
         ThemeList themeList = UI.getCurrent().getElement().getThemeList();
         if (themeList.contains(Lumo.DARK)) {
@@ -93,13 +117,14 @@ public class MainView extends VerticalLayout {
         }
     }
 
-    private void listProductsInGrid(String filterText, Company company) {
+    public void listProductsInGrid(String filterText, Company company) {
         List<Product> gridItems = dataService.findAllProducts(filterText,company);
         grid.setItems(gridItems);
         //numberOfProducts = gridItems.size();
     }
 
     private void selectCompany(AbstractField.ComponentValueChangeEvent<ComboBox<Company>,Company> event) {
+        stopTimerTask();
         if (companySelector.isEmpty()) {
             companyInfo.setItems(new ArrayList<>());
             companyInfo.setVisible(false);
@@ -109,6 +134,7 @@ public class MainView extends VerticalLayout {
             companyInfo.setVisible(true);
         }
         listProductsInGrid(filter.getValue(), event.getValue());
+        startTimerTask();
     }
 
     private void configureUIElements() {
@@ -157,11 +183,15 @@ public class MainView extends VerticalLayout {
         filter.addValueChangeListener(e -> listProductsInGrid(e.getValue(), companySelector.getValue()));
 
         // Connect selected Product to editor or hide if none is selected
-        grid.asSingleSelect().addValueChangeListener(e -> productEditor.editProduct(e.getValue()));
+        grid.asSingleSelect().addValueChangeListener(e -> {
+                stopTimerTask();
+                productEditor.editProduct(e.getValue());
+        });
         //grid.addItemClickListener(e -> productEditor.editProduct(e.getItem()));
 
         // Instantiate and edit new Customer the new button is clicked
         addNewBtn.addClickListener(e -> {
+            stopTimerTask();
             grid.asSingleSelect().clear();
             productEditor.editProduct(new Product());
         });
@@ -169,9 +199,6 @@ public class MainView extends VerticalLayout {
         // Listen changes made by the editor, refresh data from backend
         //productEditor.
         productEditor.setChangeHandler(this::onEditorChange);
-
-
-
 
         // Initialize listing
         listProductsInGrid(null, null);
@@ -181,7 +208,21 @@ public class MainView extends VerticalLayout {
         productEditor.setVisible(false);
         grid.asSingleSelect().clear();
         listProductsInGrid(filter.getValue(), companySelector.getValue());
+        startTimerTask();
     }
 
 
+    @Override
+    public void beforeLeave(BeforeLeaveEvent beforeLeaveEvent) {
+        stopTimerTask();
+    }
+
+    private void stopTimerTask() {
+        executor.shutdown();
+    }
+
+    private void startTimerTask() {
+        executor = Executors.newSingleThreadScheduledExecutor();
+        executor.scheduleAtFixedRate(updateUI, 2, 5, TimeUnit.SECONDS);
+    }
 }
