@@ -1,8 +1,6 @@
-package com.demo.SpringDBwithUI;
+package com.demo.SpringDBwithUI.data;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import org.hibernate.annotations.Formula;
-import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.*;
 import javax.validation.constraints.Email;

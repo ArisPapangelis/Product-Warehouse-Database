@@ -1,7 +1,7 @@
 package com.demo.SpringDBwithUI.views;
 
-import com.demo.SpringDBwithUI.Company;
-import com.demo.SpringDBwithUI.DataService;
+import com.demo.SpringDBwithUI.data.Company;
+import com.demo.SpringDBwithUI.data.DataService;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.H1;

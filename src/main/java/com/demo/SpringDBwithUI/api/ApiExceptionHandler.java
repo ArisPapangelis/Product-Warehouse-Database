@@ -17,6 +17,11 @@ import java.sql.SQLIntegrityConstraintViolationException;
 import java.time.LocalDateTime;
 import java.util.NoSuchElementException;
 
+
+/**
+ * General exception handler for all possible exceptions that can be thrown in the ApiController class,
+ * which handles all requests to the REST API. Implemented through @ControllerAdvice annotation
+ */
 @ControllerAdvice
 public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 

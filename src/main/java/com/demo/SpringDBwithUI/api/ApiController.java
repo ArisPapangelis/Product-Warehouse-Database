@@ -1,24 +1,26 @@
 package com.demo.SpringDBwithUI.api;
 
-import com.demo.SpringDBwithUI.Company;
-import com.demo.SpringDBwithUI.DataService;
-import com.demo.SpringDBwithUI.Product;
+import com.demo.SpringDBwithUI.data.Company;
+import com.demo.SpringDBwithUI.data.DataService;
+import com.demo.SpringDBwithUI.data.Product;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
-import javax.servlet.http.HttpServletResponse;
-import java.util.Collections;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
-@RestController // This means that this class is a Rest Controller
-@RequestMapping(path="/api") // This means URL's start with /app (after Application path)
+/**
+ * Controller class that handles all requests to the REST API. Implements GET, POST, PUT and DELETE mappings
+ * for both Products and Companies for full CRUD functionality, and handles all exceptions through the ApiExceptionHandler class.
+ */
+@RestController
+@RequestMapping(path="/api") // URL's start with /api (after Application path)
 public class ApiController {
 
     private final DataService dataService;
 
+    //Constructor injection of DataService
     public ApiController(DataService dataService) {
         this.dataService = dataService;
     }
@@ -27,7 +29,6 @@ public class ApiController {
     @GetMapping(path="/products")
     public Iterable<Product> getAllProducts(@RequestParam(required = false) String name,
                                             @RequestParam(required = false) String company) {
-        // This returns a JSON or XML with the users
 
         Company c = dataService.findCompanyByName(company).orElse(null);
         if (company!=null && company.isBlank()) company=null;
@@ -40,14 +41,14 @@ public class ApiController {
         return products;
     }
 
+
     @GetMapping(value = "/products/{id}")
     public Product getByProductId(@PathVariable("id") Long id) {
         return dataService.findProductByID(id).get();
     }
 
 
-
-    @PostMapping(path="/products") // Map ONLY POST Requests
+    @PostMapping(path="/products")
     @ResponseStatus(value = HttpStatus.CREATED)
     public Product addNewProduct(@RequestBody Product p) {
 
@@ -63,7 +64,7 @@ public class ApiController {
     }
 
 
-    @PutMapping(path="/products/{id}") // Map ONLY POST Requests
+    @PutMapping(path="/products/{id}")
     public Product updateProductById(@PathVariable("id") Long id, @RequestBody Product p) {
 
         Product product;
@@ -90,6 +91,7 @@ public class ApiController {
         return product;
     }
 
+
     @DeleteMapping(path = "/products/{id}", produces = "application/json")
     public String deleteProduct(@PathVariable("id") Long id) {
         dataService.deleteProduct(dataService.findProductByID(id).get());
@@ -108,6 +110,7 @@ public class ApiController {
         if (company.isEmpty()) throw new NoSuchElementException("There is no company with the requested name in the database");
         return List.of(company.get());
     }
+
 
     @GetMapping(value = "/companies/{id}")
     public Company getByCompanyId(@PathVariable("id") Long id) {
@@ -147,10 +150,10 @@ public class ApiController {
         return company;
     }
 
+
     @DeleteMapping(path = "/companies/{id}", produces = "application/json")
     public String deleteCompany(@PathVariable("id") Long id) {
         dataService.deleteCompany(dataService.findCompanyById(id).get());
         return "\"status\": \"Company deleted successfully\"";
     }
-
 }

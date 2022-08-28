@@ -1,5 +1,8 @@
 package com.demo.SpringDBwithUI;
 
+import com.demo.SpringDBwithUI.data.Company;
+import com.demo.SpringDBwithUI.data.DataService;
+import com.demo.SpringDBwithUI.data.Product;
 import com.vaadin.flow.component.page.AppShellConfigurator;
 import com.vaadin.flow.component.page.Push;
 import com.vaadin.flow.theme.Theme;
@@ -11,8 +14,6 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.Optional;
 
 @SpringBootApplication
 @RestController
@@ -57,27 +58,6 @@ public class SpringDBwithUiApplication implements CommandLineRunner, AppShellCon
 
 		company = new Company("OliveSpring", 121503653L, "6948352325", "info@olivespring.gr", "Leoforos Dodonis 46");
 		dataService.saveCompany(company);
-
-		/*
-
-		// fetch all products
-		log.info("Products found with findAll():");
-		log.info("-------------------------------");
-		for (Product product : repository.findAll()) {
-			log.info(product.toString());
-		}
-		log.info("");
-
-		// fetch products by name
-		log.info("Product found with findByName('Eudora'):");
-		log.info("--------------------------------------------");
-		for (Product blend : repository.findByName("Eudora")) {
-			log.info(blend.toString());
-		}
-		log.info("");
-
-		 */
-
 
 
 	}

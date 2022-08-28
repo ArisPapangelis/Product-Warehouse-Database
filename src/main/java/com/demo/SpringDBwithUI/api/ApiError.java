@@ -2,6 +2,9 @@ package com.demo.SpringDBwithUI.api;
 
 import org.springframework.http.HttpStatus;
 
+/**
+ * Class describing the Error returned whenever there is an exception in the REST API.
+ */
 public class ApiError {
 
     private String timeStamp;

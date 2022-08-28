@@ -1,8 +1,8 @@
 package com.demo.SpringDBwithUI.views;
 
-import com.demo.SpringDBwithUI.Company;
-import com.demo.SpringDBwithUI.DataService;
-import com.demo.SpringDBwithUI.Product;
+import com.demo.SpringDBwithUI.data.Company;
+import com.demo.SpringDBwithUI.data.DataService;
+import com.demo.SpringDBwithUI.data.Product;
 import com.vaadin.flow.component.*;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
@@ -11,7 +11,6 @@ import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.page.Push;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.dom.ThemeList;

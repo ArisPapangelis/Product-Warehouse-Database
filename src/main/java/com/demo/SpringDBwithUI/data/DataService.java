@@ -1,4 +1,4 @@
-package com.demo.SpringDBwithUI;
+package com.demo.SpringDBwithUI.data;
 
 import org.springframework.stereotype.Service;
 
@@ -8,7 +8,6 @@ import java.util.Optional;
 @Service
 public class DataService {
 
-    //TODO Change return type of saveProduct and updateProduct
     private final ProductRepository productRepository;
     private final CompanyRepository companyRepository;
 
