@@ -4,6 +4,8 @@ import com.demo.SpringDBwithUI.data.Company;
 import com.demo.SpringDBwithUI.data.DataService;
 import com.demo.SpringDBwithUI.data.Product;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.annotation.Secured;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -16,6 +18,7 @@ import java.util.Optional;
  */
 @RestController
 @RequestMapping(path="/api") // URL's start with /api (after Application path)
+@Secured("ROLE_ADMIN")
 public class ApiController {
 
     private final DataService dataService;

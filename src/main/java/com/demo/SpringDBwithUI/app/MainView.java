@@ -1,10 +1,12 @@
-package com.demo.SpringDBwithUI.views;
+package com.demo.SpringDBwithUI.app;
 
 import com.demo.SpringDBwithUI.data.Company;
 import com.demo.SpringDBwithUI.data.DataService;
 import com.demo.SpringDBwithUI.data.Product;
+import com.demo.SpringDBwithUI.security.SecurityService;
 import com.vaadin.flow.component.*;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.H1;
@@ -18,14 +20,18 @@ import com.vaadin.flow.router.*;
 import com.vaadin.flow.theme.lumo.Lumo;
 
 
+import javax.annotation.security.PermitAll;
 import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-@Route("app")
-@PageTitle("Home | P&I Demo")
+@PermitAll
+@Route("")
+@PageTitle("Products | P&I Demo")
 public class MainView extends VerticalLayout implements BeforeLeaveObserver {
+
+    private final SecurityService securityService;
 
     private final ProductEditor productEditor;
     private final DataService dataService;
@@ -36,6 +42,7 @@ public class MainView extends VerticalLayout implements BeforeLeaveObserver {
     private final Button addNewBtn;
     private final Button addNewCompanyBtn;
     private final Button toggleDarkModeBtn;
+    private final Button logoutBtn;
     private final ComboBox<Company> companySelector;
     private final H1 header;
     //private H3 companyInfo;
@@ -45,11 +52,12 @@ public class MainView extends VerticalLayout implements BeforeLeaveObserver {
     private TimerTask updateUI;
     private ScheduledExecutorService executor;
     private UI ui;
-    public MainView(DataService dataService) {
+    public MainView(DataService dataService, SecurityService securityService) {
         addClassName("main-view");
         setSizeFull();
 
         this.dataService = dataService;
+        this.securityService = securityService;
 
         this.productEditor = new ProductEditor(dataService);
         this.grid = new Grid<>(Product.class);
@@ -60,12 +68,15 @@ public class MainView extends VerticalLayout implements BeforeLeaveObserver {
         this.header = new H1("Products Database");
         this.companyInfo = new Grid<>(Company.class);
         this.addNewCompanyBtn = new Button("New company");
+        this.logoutBtn = new Button("Log out", VaadinIcon.SIGN_OUT.create(), event -> logout());
         this.companiesLink = new RouterLink("Full list of companies", CompaniesView.class);
 
 
+
         // Build layout
-        VerticalLayout headerLayout = new VerticalLayout(toggleDarkModeBtn,header);
-        headerLayout.setAlignSelf(Alignment.END, toggleDarkModeBtn);
+        VerticalLayout headerLayout = new VerticalLayout(toggleDarkModeBtn,logoutBtn,header);
+        headerLayout.setAlignSelf(Alignment.START, toggleDarkModeBtn);
+        headerLayout.setAlignSelf(Alignment.END, logoutBtn);
         headerLayout.setAlignSelf(Alignment.CENTER, header);
         headerLayout.setSpacing(false);
 
@@ -101,10 +112,16 @@ public class MainView extends VerticalLayout implements BeforeLeaveObserver {
                     companySelector.setValue(company);
                     productEditor.reloadCompanyComboBox();
                     listProductsInGrid(filter.getValue(), companySelector.getValue());
+                    ui.push();
                 });
             }
         };
         startTimerTask();
+    }
+
+    private void logout() {
+        stopTimerTask();
+        securityService.logout();
     }
 
     public static void toggleDarkMode(ClickEvent<Button> event) {
@@ -160,21 +177,6 @@ public class MainView extends VerticalLayout implements BeforeLeaveObserver {
         companyInfo.setAllRowsVisible(true);
         companyInfo.setVisible(false);
 
-        /*
-        Lambda function too long, so added ComponentValueChangeEvent handler to constructor of ComboBox
-        companySelector.addValueChangeListener(e -> {
-            if (companySelector.isEmpty()) {
-                companyInfo.setItems(new ArrayList<>());
-                companyInfo.setVisible(false);
-            }
-            else {
-                companyInfo.setItems(e.getValue());
-                companyInfo.setVisible(true);
-            }
-            listProductsInGrid(filter.getValue(), e.getValue());
-        });
-         */
-
         // Hook logic to components
 
         // Replace listing with filtered content when user changes filter
@@ -194,6 +196,8 @@ public class MainView extends VerticalLayout implements BeforeLeaveObserver {
             grid.asSingleSelect().clear();
             productEditor.editProduct(new Product());
         });
+
+        logoutBtn.addThemeVariants(ButtonVariant.LUMO_ERROR);
 
         // Listen changes made by the editor, refresh data from backend
         //productEditor.
@@ -222,6 +226,6 @@ public class MainView extends VerticalLayout implements BeforeLeaveObserver {
 
     private void startTimerTask() {
         executor = Executors.newSingleThreadScheduledExecutor();
-        executor.scheduleAtFixedRate(updateUI, 2, 5, TimeUnit.SECONDS);
+        executor.scheduleAtFixedRate(updateUI, 1, 4, TimeUnit.SECONDS);
     }
 }

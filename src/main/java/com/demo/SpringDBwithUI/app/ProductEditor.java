@@ -1,4 +1,4 @@
-package com.demo.SpringDBwithUI.views;
+package com.demo.SpringDBwithUI.app;
 
 import com.demo.SpringDBwithUI.data.Company;
 import com.demo.SpringDBwithUI.data.DataService;

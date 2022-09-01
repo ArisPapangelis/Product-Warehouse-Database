@@ -5,6 +5,8 @@ import com.demo.SpringDBwithUI.data.DataService;
 import com.demo.SpringDBwithUI.data.Product;
 import com.vaadin.flow.component.page.AppShellConfigurator;
 import com.vaadin.flow.component.page.Push;
+import com.vaadin.flow.shared.communication.PushMode;
+import com.vaadin.flow.shared.ui.Transport;
 import com.vaadin.flow.theme.Theme;
 import com.vaadin.flow.theme.lumo.Lumo;
 import org.slf4j.Logger;
@@ -16,9 +18,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.web.bind.annotation.RestController;
 
 @SpringBootApplication
-@RestController
 @Theme(themeClass = Lumo.class, variant = Lumo.LIGHT)
-@Push
+@Push(value = PushMode.MANUAL, transport = Transport.WEBSOCKET_XHR)
 public class SpringDBwithUiApplication implements CommandLineRunner, AppShellConfigurator {
 
 

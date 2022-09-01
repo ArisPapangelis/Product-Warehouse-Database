@@ -69,4 +69,11 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
         ApiError bodyOfResponse = new ApiError(LocalDateTime.now().toString(), HttpStatus.BAD_REQUEST, ex.toString(), "The type of the request body attributes is different than expected");
         return handleExceptionInternal(ex, bodyOfResponse, new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
     }
+
+    @ExceptionHandler(value = org.springframework.security.access.AccessDeniedException.class)
+    protected ResponseEntity<Object> handleAccessDenied(org.springframework.security.access.AccessDeniedException ex, WebRequest request) {
+        ApiError bodyOfResponse = new ApiError(LocalDateTime.now().toString(), HttpStatus.FORBIDDEN, ex.toString(), "Given credentials are forbidden from accessing the resource");
+        return handleExceptionInternal(ex, bodyOfResponse, new HttpHeaders(), HttpStatus.FORBIDDEN, request);
+    }
+
 }
