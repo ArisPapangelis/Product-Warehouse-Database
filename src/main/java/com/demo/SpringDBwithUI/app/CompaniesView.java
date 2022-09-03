@@ -3,23 +3,25 @@ package com.demo.SpringDBwithUI.app;
 import com.demo.SpringDBwithUI.data.Company;
 import com.demo.SpringDBwithUI.data.DataService;
 import com.demo.SpringDBwithUI.security.SecurityService;
+import com.vaadin.flow.component.AttachEvent;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.router.HighlightConditions;
-import com.vaadin.flow.router.PageTitle;
-import com.vaadin.flow.router.Route;
-import com.vaadin.flow.router.RouterLink;
+import com.vaadin.flow.router.*;
+import com.vaadin.flow.server.auth.AnonymousAllowed;
 
 import javax.annotation.security.PermitAll;
+import java.util.TimerTask;
 
 @PermitAll
+//@AnonymousAllowed
 @Route("/companies")
-@PageTitle("Companies | P&I Demo")
-public class CompaniesView extends VerticalLayout {
+//@PageTitle("Companies | P&I Demo") //Bug: Page secured with Spring security doesn't show page title when set through Vaadin PageTitle annotation, requires dynamic setting of title
+public class CompaniesView extends VerticalLayout implements HasDynamicTitle {
 
     private final DataService dataService;
     private final SecurityService securityService;
@@ -41,7 +43,7 @@ public class CompaniesView extends VerticalLayout {
 
         this.toggleDarkModeBtn = new Button("Toggle dark mode", MainView::toggleDarkMode);
         this.logoutBtn = new Button("Log out", VaadinIcon.SIGN_OUT.create(), event -> securityService.logout());
-        this.header = new H1("List of Companies");
+        this.header = new H1("List of Suppliers");
         this.companyGrid = new Grid<>(Company.class);
         this.productsLink = new RouterLink("<- Go back to list of products", MainView.class);
 
@@ -63,5 +65,10 @@ public class CompaniesView extends VerticalLayout {
         productsLink.setHighlightCondition(HighlightConditions.sameLocation());
 
         logoutBtn.addThemeVariants(ButtonVariant.LUMO_ERROR);
+    }
+
+    @Override
+    public String getPageTitle() {
+        return "Companies | P&I Demo";
     }
 }

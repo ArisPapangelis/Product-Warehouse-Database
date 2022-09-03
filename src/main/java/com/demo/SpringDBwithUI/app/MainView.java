@@ -11,25 +11,31 @@ import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.page.Page;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.component.textfield.TextFieldVariant;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.dom.ThemeList;
 import com.vaadin.flow.router.*;
+import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.flow.theme.lumo.Lumo;
 
 
 import javax.annotation.security.PermitAll;
+import java.lang.annotation.Inherited;
 import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 @PermitAll
+//@AnonymousAllowed
 @Route("")
-@PageTitle("Products | P&I Demo")
-public class MainView extends VerticalLayout implements BeforeLeaveObserver {
+//@PageTitle("Products | P&I Demo") //Bug: Page secured with Spring security doesn't show page title when set through Vaadin PageTitle annotation, requires dynamic setting of title
+public class MainView extends VerticalLayout implements BeforeLeaveObserver, HasDynamicTitle {
 
     private final SecurityService securityService;
 
@@ -38,6 +44,7 @@ public class MainView extends VerticalLayout implements BeforeLeaveObserver {
 
     private final Grid<Product> grid;
     private final TextField filter;
+    private final TextField numberOfProducts;
 
     private final Button addNewBtn;
     private final Button addNewCompanyBtn;
@@ -65,11 +72,12 @@ public class MainView extends VerticalLayout implements BeforeLeaveObserver {
         this.addNewBtn = new Button("New product", VaadinIcon.PLUS.create());
         this.toggleDarkModeBtn = new Button("Toggle dark mode", MainView::toggleDarkMode);
         this.companySelector = new ComboBox<>(this::selectCompany);
-        this.header = new H1("Products Database");
+        this.header = new H1("Product Warehouse Database");
         this.companyInfo = new Grid<>(Company.class);
         this.addNewCompanyBtn = new Button("New company");
         this.logoutBtn = new Button("Log out", VaadinIcon.SIGN_OUT.create(), event -> logout());
         this.companiesLink = new RouterLink("Full list of companies", CompaniesView.class);
+        this.numberOfProducts = new TextField();
 
 
 
@@ -82,8 +90,11 @@ public class MainView extends VerticalLayout implements BeforeLeaveObserver {
 
         HorizontalLayout companies = new HorizontalLayout(companySelector, companiesLink);
         companies.setDefaultVerticalComponentAlignment(Alignment.CENTER);
+        //companies.setWidthFull();
 
-        HorizontalLayout actions = new HorizontalLayout(filter, addNewBtn);
+        HorizontalLayout products = new HorizontalLayout(filter, numberOfProducts, addNewBtn);
+        products.setAlignSelf(Alignment.CENTER, numberOfProducts);
+        products.setWidthFull();
 
         HorizontalLayout gridAndEditor = new HorizontalLayout(grid, productEditor);
         gridAndEditor.setFlexGrow(3,grid);
@@ -91,10 +102,14 @@ public class MainView extends VerticalLayout implements BeforeLeaveObserver {
         gridAndEditor.setSizeFull();
         productEditor.setWidth(20,Unit.PERCENTAGE);
 
-        add(headerLayout,companies, companyInfo, actions,gridAndEditor);
+        add(headerLayout, companies, companyInfo, products, gridAndEditor);
 
         configureUIElements();
 
+    }
+    @Override
+    public String getPageTitle() {
+        return "Products | P&I Demo";
     }
 
     @Override
@@ -136,11 +151,11 @@ public class MainView extends VerticalLayout implements BeforeLeaveObserver {
     public void listProductsInGrid(String filterText, Company company) {
         List<Product> gridItems = dataService.findAllProducts(filterText,company);
         grid.setItems(gridItems);
-        //numberOfProducts = gridItems.size();
+        numberOfProducts.setValue("Number of products: " + gridItems.size());
     }
 
     private void selectCompany(AbstractField.ComponentValueChangeEvent<ComboBox<Company>,Company> event) {
-        stopTimerTask();
+        //stopTimerTask();
         if (companySelector.isEmpty()) {
             companyInfo.setItems(new ArrayList<>());
             companyInfo.setVisible(false);
@@ -150,7 +165,7 @@ public class MainView extends VerticalLayout implements BeforeLeaveObserver {
             companyInfo.setVisible(true);
         }
         listProductsInGrid(filter.getValue(), event.getValue());
-        startTimerTask();
+        //startTimerTask();
     }
 
     private void configureUIElements() {
@@ -165,6 +180,8 @@ public class MainView extends VerticalLayout implements BeforeLeaveObserver {
         grid.getColumnByKey("weight").setHeader("Weight (gr)");
 
         filter.setPlaceholder("Filter by product name");
+        numberOfProducts.setReadOnly(true);
+        numberOfProducts.setWidth(8, Unit.PERCENTAGE);
 
         companySelector.setPlaceholder("Filter by company");
         companySelector.setItems(dataService.findAllCompanies());
