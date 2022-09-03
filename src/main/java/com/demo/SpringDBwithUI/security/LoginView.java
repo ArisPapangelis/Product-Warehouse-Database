@@ -34,6 +34,9 @@ import org.springframework.security.provisioning.UserDetailsManager;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * View which models the login screen of the application.
+ */
 @Route("login")
 @PageTitle("Login | P&I Demo")
 public class LoginView extends VerticalLayout implements BeforeEnterObserver {

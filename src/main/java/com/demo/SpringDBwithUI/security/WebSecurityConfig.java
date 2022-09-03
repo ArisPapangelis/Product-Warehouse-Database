@@ -32,6 +32,10 @@ import javax.sql.DataSource;
 
 import static org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType.H2;
 
+/**
+ * Configuration class which configures Spring security for both the single page application
+ * and the REST API, and sets up JDBC based database backed authentication.
+ */
 @EnableWebSecurity
 @Configuration
 @EnableGlobalMethodSecurity(securedEnabled = true, jsr250Enabled = true)

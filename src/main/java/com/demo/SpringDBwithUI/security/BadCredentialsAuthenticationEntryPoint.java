@@ -14,6 +14,10 @@ import java.io.OutputStream;
 import java.time.LocalDateTime;
 
 
+/**
+ * Class that handles the authentication exception thrown when a user submits wrong
+ * or non-existent credentials through the REST API.
+ */
 @Component
 public class BadCredentialsAuthenticationEntryPoint implements AuthenticationEntryPoint {
 

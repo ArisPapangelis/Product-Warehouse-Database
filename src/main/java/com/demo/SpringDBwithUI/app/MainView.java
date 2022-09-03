@@ -15,6 +15,7 @@ import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.page.Page;
+import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.textfield.TextFieldVariant;
 import com.vaadin.flow.data.value.ValueChangeMode;
@@ -79,8 +80,6 @@ public class MainView extends VerticalLayout implements BeforeLeaveObserver, Has
         this.companiesLink = new RouterLink("Full list of companies", CompaniesView.class);
         this.numberOfProducts = new TextField();
 
-
-
         // Build layout
         VerticalLayout headerLayout = new VerticalLayout(toggleDarkModeBtn,logoutBtn,header);
         headerLayout.setAlignSelf(Alignment.START, toggleDarkModeBtn);
@@ -93,8 +92,9 @@ public class MainView extends VerticalLayout implements BeforeLeaveObserver, Has
         //companies.setWidthFull();
 
         HorizontalLayout products = new HorizontalLayout(filter, numberOfProducts, addNewBtn);
-        products.setAlignSelf(Alignment.CENTER, numberOfProducts);
-        products.setWidthFull();
+        products.setDefaultVerticalComponentAlignment(Alignment.CENTER);
+        products.setWidth(100, Unit.PERCENTAGE);
+        //products.setFlexGrow(2, numberOfProducts);
 
         HorizontalLayout gridAndEditor = new HorizontalLayout(grid, productEditor);
         gridAndEditor.setFlexGrow(3,grid);
@@ -152,10 +152,11 @@ public class MainView extends VerticalLayout implements BeforeLeaveObserver, Has
         List<Product> gridItems = dataService.findAllProducts(filterText,company);
         grid.setItems(gridItems);
         numberOfProducts.setValue("Number of products: " + gridItems.size());
+        //numberOfProducts.setValue("Number of products: 999");
     }
 
     private void selectCompany(AbstractField.ComponentValueChangeEvent<ComboBox<Company>,Company> event) {
-        //stopTimerTask();
+
         if (companySelector.isEmpty()) {
             companyInfo.setItems(new ArrayList<>());
             companyInfo.setVisible(false);
@@ -165,7 +166,7 @@ public class MainView extends VerticalLayout implements BeforeLeaveObserver, Has
             companyInfo.setVisible(true);
         }
         listProductsInGrid(filter.getValue(), event.getValue());
-        //startTimerTask();
+        companySelector.blur();
     }
 
     private void configureUIElements() {
@@ -181,12 +182,15 @@ public class MainView extends VerticalLayout implements BeforeLeaveObserver, Has
 
         filter.setPlaceholder("Filter by product name");
         numberOfProducts.setReadOnly(true);
-        numberOfProducts.setWidth(8, Unit.PERCENTAGE);
+        numberOfProducts.setWidth(12, Unit.PERCENTAGE);
+
 
         companySelector.setPlaceholder("Filter by company");
         companySelector.setItems(dataService.findAllCompanies());
         companySelector.setItemLabelGenerator(Company::getCompany);
         companySelector.setClearButtonVisible(true);
+        companySelector.addFocusListener(comboBoxFocusEvent -> stopTimerTask());
+        companySelector.addBlurListener(comboBoxBlurEvent -> startTimerTask());
 
         companiesLink.setHighlightCondition(HighlightConditions.sameLocation());
 

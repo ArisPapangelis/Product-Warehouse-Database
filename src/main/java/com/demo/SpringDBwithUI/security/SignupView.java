@@ -28,6 +28,10 @@ import org.springframework.security.provisioning.UserDetailsManager;
 import java.util.ArrayList;
 import java.util.List;
 
+
+/**
+ * View which models the signup screen of the application.
+ */
 @AnonymousAllowed
 @Route("signup")
 @PageTitle("Signup | P&I Demo")
