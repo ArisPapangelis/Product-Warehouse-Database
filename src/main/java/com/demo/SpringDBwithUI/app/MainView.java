@@ -107,6 +107,12 @@ public class MainView extends VerticalLayout implements BeforeLeaveObserver, Has
         configureUIElements();
 
     }
+
+    /**
+     * Method which dynamically returns the title of the page.
+     *
+     * @return The title of the page at /app.
+     */
     @Override
     public String getPageTitle() {
         return "Products | P&I Demo";

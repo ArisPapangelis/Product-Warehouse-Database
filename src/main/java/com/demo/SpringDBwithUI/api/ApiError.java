@@ -12,6 +12,14 @@ public class ApiError {
     private String error;
     private String message;
 
+    /**
+     * Constructor for ApiError.
+     *
+     * @param timeStamp Timestamp when the exception was thrown.
+     * @param status HTTP status explaining the error.
+     * @param error Internal exception message.
+     * @param message Explanatory message for the user.
+     */
     public ApiError(String timeStamp, HttpStatus status, String error, String message) {
         this.timeStamp = timeStamp;
         this.status = status;

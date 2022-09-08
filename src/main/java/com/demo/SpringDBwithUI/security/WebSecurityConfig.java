@@ -1,15 +1,11 @@
 package com.demo.SpringDBwithUI.security;
 
 import com.vaadin.flow.spring.security.VaadinWebSecurityConfigurerAdapter;
-import com.zaxxer.hikari.util.DriverDataSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
-import org.springframework.core.env.Environment;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.jdbc.datasource.DelegatingDataSource;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
-import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
 import org.springframework.jdbc.datasource.init.DatabasePopulator;
 import org.springframework.jdbc.datasource.init.DatabasePopulatorUtils;
 import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
@@ -20,17 +16,12 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.jdbc.JdbcDaoImpl;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.provisioning.JdbcUserDetailsManager;
 import org.springframework.security.provisioning.UserDetailsManager;
 
 import javax.sql.DataSource;
-
-import static org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType.H2;
 
 /**
  * Configuration class which configures Spring security for both the single page application
@@ -41,6 +32,12 @@ import static org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType.
 @EnableGlobalMethodSecurity(securedEnabled = true, jsr250Enabled = true)
 public class WebSecurityConfig {
 
+    /**
+     * Security configuration for the VAADIN single page application. The class is used ONLY when ApiSecurityConfig
+     * is not applicable.
+     *
+     * @see ApiSecurityConfig
+     */
     @Configuration
     public static class AppSecurityConfig extends VaadinWebSecurityConfigurerAdapter {
         @Override
@@ -52,10 +49,6 @@ public class WebSecurityConfig {
             // ignoring public views annotated with @AnonymousAllowed,
             // restricting access to other views/endpoints, and enabling
             // ViewAccessChecker authorization.
-            // You can add any possible extra configurations of your own
-            // here (the following is just an example):
-
-            // http.rememberMe().alwaysRemember(false);
 
             super.configure(http);
 
@@ -71,7 +64,12 @@ public class WebSecurityConfig {
         }
     }
 
-
+    /**
+     * Security configuration for the REST API. The class is prioritised (Order annotation) for all URLs starting with /api. For all other URLs,
+     * AppSecurityConfig is used.
+     *
+     * @see AppSecurityConfig
+     */
     @Configuration
     @Order(1)
     public static class ApiSecurityConfig extends WebSecurityConfigurerAdapter {
@@ -82,17 +80,27 @@ public class WebSecurityConfig {
             http
                     .antMatcher("/api/**")
                     .csrf().disable()
-                    .httpBasic().authenticationEntryPoint(new BadCredentialsAuthenticationEntryPoint())
+                    .httpBasic().authenticationEntryPoint(new BadCredentialsAuthenticationEntryPoint()) //Custom exception is needed to handle invalid credentials.
                     .and()
                     .authorizeHttpRequests().anyRequest().permitAll();
         }
     }
 
+    /**
+     * Password encoder bean for hashing user passwords.
+     *
+     * @return The password encoder implementation to use.
+     */
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
+    /**
+     * Datasource bean used for persisting users in the database.
+     *
+     * @return The datasource to use for persisting new users.
+     */
     @Bean
     public DataSource dataSource() {
         DriverManagerDataSource dataSource = new DriverManagerDataSource();
@@ -103,6 +111,11 @@ public class WebSecurityConfig {
         return dataSource;
     }
 
+    /**
+     * Database populator which will execute the schema.sql script to create the schema needed for persisting new users.
+     *
+     * @return The DatabasePopulator object to be passed to DatabasePopulatorUtils.execute.
+     */
     private DatabasePopulator createUserSchema() {
         ResourceDatabasePopulator databasePopulator = new ResourceDatabasePopulator();
         //databasePopulator.setContinueOnError(true);
@@ -110,11 +123,17 @@ public class WebSecurityConfig {
         return databasePopulator;
     }
 
+    /**
+     * UserDetailsManager bean which creates a built-in admin user, executes createUserSchema(), and returns a UserDetailsManager instance.
+     *
+     * @param dataSource The datasource for persisting new users.
+     * @return The UserDetailsManager object through which new users are persisted.
+     */
     @Bean
     public UserDetailsManager users(DataSource dataSource) {
         UserDetails admin = User.builder()
                 .username("admin")
-                .password(passwordEncoder().encode("demo_admin"))
+                .password(passwordEncoder().encode("demo_admin"))   //Normally would be hashed externally.
                 .roles("ADMIN")
                 .build();
         DatabasePopulatorUtils.execute(createUserSchema(), dataSource);

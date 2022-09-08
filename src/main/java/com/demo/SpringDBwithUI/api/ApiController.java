@@ -5,7 +5,6 @@ import com.demo.SpringDBwithUI.data.DataService;
 import com.demo.SpringDBwithUI.data.Product;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.annotation.Secured;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -23,12 +22,22 @@ public class ApiController {
 
     private final DataService dataService;
 
-    //Constructor injection of DataService
+    /**
+     * Constructor for ApiController. Constructor injection is used for the dependency.
+     */
     public ApiController(DataService dataService) {
         this.dataService = dataService;
     }
 
     //The following mappings are for the Products table
+    /**
+     * Method which returns all products in the database, or all products meeting optional query criteria.
+     * Returns an error (in Json) if an exception is thrown.
+     *
+     * @param name Optional product name parameter
+     * @param company Optional company name parameter
+     * @return List of products meeting query criteria, in Json representation.
+     */
     @GetMapping(path="/products")
     public Iterable<Product> getAllProducts(@RequestParam(required = false) String name,
                                             @RequestParam(required = false) String company) {
@@ -45,12 +54,26 @@ public class ApiController {
     }
 
 
+    /**
+     * Method which returns the product with the requested id.
+     * Returns an error (in Json) if an exception is thrown.
+     *
+     * @param id The id of the requested product.
+     * @return The Json representation of the requested product.
+     */
     @GetMapping(value = "/products/{id}")
     public Product getByProductId(@PathVariable("id") Long id) {
         return dataService.findProductByID(id).get();
     }
 
 
+    /**
+     * Method which persists a new product to the database.
+     * Returns an error (in Json) if an exception is thrown.
+     *
+     * @param p The product being requested for persistence in the database.
+     * @return The Json representation of the newly saved product.
+     */
     @PostMapping(path="/products")
     @ResponseStatus(value = HttpStatus.CREATED)
     public Product addNewProduct(@RequestBody Product p) {
@@ -66,7 +89,14 @@ public class ApiController {
         return product;
     }
 
-
+    /**
+     * Method which updates an existing product in the database.
+     * Returns an error (in Json) if an exception is thrown.
+     *
+     * @param p The updated product being requested for persistence in the database.
+     * @param id The id of the product being requested for update.
+     * @return The Json representation of the newly updated product.
+     */
     @PutMapping(path="/products/{id}")
     public Product updateProductById(@PathVariable("id") Long id, @RequestBody Product p) {
 
@@ -95,6 +125,13 @@ public class ApiController {
     }
 
 
+    /**
+     * Method which deletes an existing product from the database.
+     * Returns an error (in Json) if an exception is thrown.
+     *
+     * @param id The id of the product being requested for deletion.
+     * @return Status indicating successful deletion of the requested product.
+     */
     @DeleteMapping(path = "/products/{id}", produces = "application/json")
     public String deleteProduct(@PathVariable("id") Long id) {
         dataService.deleteProduct(dataService.findProductByID(id).get());
@@ -103,6 +140,13 @@ public class ApiController {
 
 
     //The following mappings are for the Companies table
+    /**
+     * Method which returns all companies in the database, or all companies meeting optional query criteria.
+     * Returns an error (in Json) if an exception is thrown.
+     *
+     * @param name Optional company name parameter
+     * @return List of companies meeting query criteria, in Json representation.
+     */
     @GetMapping(path="/companies")
     public Iterable<Company> getAllCompanies(@RequestParam(required = false) String name) {
 
@@ -115,17 +159,38 @@ public class ApiController {
     }
 
 
+    /**
+     * Method which returns the company with the requested id.
+     * Returns an error (in Json) if an exception is thrown.
+     *
+     * @param id The id of the requested company.
+     * @return The Json representation of the requested company.
+     */
     @GetMapping(value = "/companies/{id}")
     public Company getByCompanyId(@PathVariable("id") Long id) {
         return dataService.findCompanyById(id).get();
     }
 
+    /**
+     * Method which returns the number of products a requested company has in the database.
+     * Returns an error (in Json) if an exception is thrown.
+     *
+     * @param id The id of the requested company.
+     * @return The number of products the requested company has in the database.
+     */
     @GetMapping(value = "/companies/{id}/productcount", produces = "application/json")
     public String getCompanyProductCount(@PathVariable("id") Long id) {
         return String.format("\"Number of products\": \"%d\"", dataService.countCompanyProducts(dataService.findCompanyById(id).get()));
     }
 
 
+    /**
+     * Method which persists a new company to the database.
+     * Returns an error (in Json) if an exception is thrown.
+     *
+     * @param c The company being requested for persistence in the database.
+     * @return The Json representation of the newly saved company.
+     */
     @PostMapping(path="/companies") // Map ONLY POST Requests
     @ResponseStatus(value = HttpStatus.CREATED)
     public Company addNewCompany(@RequestBody Company c) {
@@ -136,6 +201,14 @@ public class ApiController {
     }
 
 
+    /**
+     * Method which updates an existing company in the database.
+     * Returns an error (in Json) if an exception is thrown.
+     *
+     * @param c The updated company being requested for persistence in the database.
+     * @param id The id of the company being requested for update.
+     * @return The Json representation of the newly updated company.
+     */
     @PutMapping(path="/companies/{id}") // Map ONLY POST Requests
     public Company updateCompanyById(@PathVariable("id") Long id, @RequestBody Company c) {
 
@@ -154,6 +227,13 @@ public class ApiController {
     }
 
 
+    /**
+     * Method which deletes an existing company from the database.
+     * Returns an error (in Json) if an exception is thrown.
+     *
+     * @param id The id of the company being requested for deletion.
+     * @return Status indicating successful deletion of the requested company.
+     */
     @DeleteMapping(path = "/companies/{id}", produces = "application/json")
     public String deleteCompany(@PathVariable("id") Long id) {
         dataService.deleteCompany(dataService.findCompanyById(id).get());

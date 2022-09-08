@@ -1,6 +1,5 @@
 package com.demo.SpringDBwithUI.security;
 
-import com.demo.SpringDBwithUI.app.MainView;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
@@ -8,15 +7,14 @@ import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.component.login.LoginForm;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.flow.router.*;
+import com.vaadin.flow.router.PageTitle;
+import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -37,10 +35,8 @@ import java.util.List;
 @PageTitle("Signup | P&I Demo")
 public class SignupView extends VerticalLayout {
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-    @Autowired
-    private UserDetailsManager users;
+    private final PasswordEncoder passwordEncoder;
+    private final UserDetailsManager users;
 
     private final Button signupBtn;
 
@@ -50,8 +46,10 @@ public class SignupView extends VerticalLayout {
     private final Button loginBtn;
 
 
-
-    public SignupView() {
+    /**
+     * Constructor for SignupView. Constructor injection is used for the two dependencies.
+     */
+    public SignupView(PasswordEncoder passwordEncoder, UserDetailsManager users) {
         setSizeFull();
         setAlignItems(Alignment.CENTER);
         setJustifyContentMode(JustifyContentMode.CENTER);
@@ -68,15 +66,18 @@ public class SignupView extends VerticalLayout {
         loginBtn.addClickListener(buttonClickEvent -> UI.getCurrent().navigate(LoginView.class));
         //UI.getCurrent().navigate("app")
         //UI.getCurrent().getPage().setLocation("/app");
-        //VerticalLayout signUpLayout = new VerticalLayout();
-        //signUpLayout.setAlignItems(Alignment.CENTER);
-        //signUpLayout.setJustifyContentMode(JustifyContentMode.CENTER);
         signupBtn.addClickListener(buttonClickEvent -> signUp());
 
         add(new H1("Product Warehouse Database"), new H2("Sign up"), signUpUsername, signUpPassword, signupBtn, new H3("If you have already signed up, you can log in below"), loginBtn);
+        this.passwordEncoder = passwordEncoder;
+        this.users = users;
     }
 
 
+    /**
+     * Method called when the "Sign up" button is pressed. The current username and password(after hashing) in the corresponding fields are
+     * used to create a new user. Edge cases for already existing users or empty fields are also checked.
+     */
     private void signUp() {
         List<GrantedAuthority> authorities = new ArrayList<>();
         authorities.add(new SimpleGrantedAuthority("ROLE_USER"));

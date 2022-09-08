@@ -7,9 +7,12 @@ import org.springframework.data.repository.CrudRepository;
 //import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 
 //@RepositoryRestResource(collectionResourceRel = "products", path="products")
+
+/**
+ * Includes repository search methods for the Products table.
+ */
 public interface ProductRepository extends CrudRepository<Product, Long> {
 
-    //Product findById(int id);
     List<Product> findByName(String name);
     List<Product> findByNameStartsWithIgnoreCase(String name);
     Optional<Product> findByNameIgnoreCaseAndWeightAndCompany(String name, double weight, Company company);

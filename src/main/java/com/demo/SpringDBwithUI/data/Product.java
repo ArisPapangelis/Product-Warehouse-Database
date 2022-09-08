@@ -7,6 +7,9 @@ import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
+/**
+ * Model of the Product entity.
+ */
 @Entity
 @Table(name = "Products")
 public class Product {

@@ -9,6 +9,9 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.util.List;
 
+/**
+ * Model of the Company entity.
+ */
 @Entity
 @Table(name = "Companies")
 public class Company {

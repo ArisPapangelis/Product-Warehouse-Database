@@ -21,18 +21,21 @@ import com.vaadin.flow.spring.annotation.UIScope;
 import org.springframework.beans.factory.annotation.Autowired;
 
 
+/**
+ * Product editor component, used when a user would like to create a new product, update or delete
+ * an existing product.
+ */
 @SpringComponent
 @UIScope
 public class ProductEditor extends FormLayout implements KeyNotifier {
 
     private final DataService dataService;
 
-    /**
-     * The currently edited product
-     */
+
+    //The currently edited product
     private Product product;
 
-    /* Fields to edit properties in Product entity */
+    // Fields to edit properties in Product entity
     private final TextField name;
     private final NumberField weight;
     private final TextField availability;
@@ -48,14 +51,24 @@ public class ProductEditor extends FormLayout implements KeyNotifier {
 
     Binder<Product> binder;
     private ChangeHandler changeHandler;
+
+    /**
+     * Functional interface used to execute the code passed from MainView whenever there is a product editor event.
+     */
     @FunctionalInterface
     public interface ChangeHandler {
         void onChange();
     }
 
+    /**
+     * Boolean variable which shows whether the product editor was called to add a new product
+     * or modify an existing product.
+     */
     private boolean persisted;
 
-    @Autowired
+    /**
+     * Constructor for ProductEditor. Constructor injection is used for the dependency.
+     */
     public ProductEditor(DataService dataService) {
         this.dataService = dataService;
         this.name = new TextField("Name");
@@ -75,18 +88,16 @@ public class ProductEditor extends FormLayout implements KeyNotifier {
         HorizontalLayout actions = new HorizontalLayout(save, delete, cancel);
         add(name, weight, availability, price, category, description, company, actions);
 
-        // bind using naming convention
+        //Bind using naming convention
         binder.bindInstanceFields(this);
 
-        // Configure and style components
-        //setSpacing(true);
-
+        //Configure and style components
         save.getElement().getThemeList().add("primary");
         delete.getElement().getThemeList().add("error");
 
         addKeyPressListener(Key.ENTER, e -> save());
 
-        // wire action buttons to save, delete and reset
+        //Wire action buttons to save, delete and cancel
         save.addClickListener(e -> save());
         delete.addClickListener(e -> delete());
         cancel.addClickListener(e -> cancel());
@@ -97,7 +108,12 @@ public class ProductEditor extends FormLayout implements KeyNotifier {
     }
 
 
-
+    /**
+     * Method called when the user presses the delete button, after having selected an existing product.
+     * Tries to delete the selected product from the database, and shows a success or failure notification
+     * based on the result.
+     * Finally, executes the code from MainView through the functional interface.
+     */
     private void delete() {
         Notification notification;
         if (dataService.deleteProduct(product)){
@@ -111,6 +127,12 @@ public class ProductEditor extends FormLayout implements KeyNotifier {
         changeHandler.onChange();
     }
 
+    /**
+     * Method called when the user presses the save button, after having selected an existing product or pressing new product.
+     * Tries to save a new product or update the selected product from the database, depending on the "persisted" variable,
+     * and shows a success or failure notification based on the result.
+     * Finally, executes the code from MainView through the functional interface.
+     */
     private void save() {
         Notification notification;
         Product p;
@@ -139,12 +161,24 @@ public class ProductEditor extends FormLayout implements KeyNotifier {
         changeHandler.onChange();
     }
 
+    /**
+     * Method called when the user presses the cancel button, after having selected an existing product or pressing new product.
+     * Cancels the action of opening the product editor and returns to MainView.
+     * Finally, executes the code from MainView through the functional interface.
+     */
     private void cancel() {
         editProduct(null);
         changeHandler.onChange();
     }
 
 
+    /**
+     * Method which is called when the user selects a product from the grid or presses the new product button.
+     * Sets up the product editor component depending on the button which was pressed to call it,
+     * and binds the editor fields to the product entity being edited.
+     *
+     * @param p The selected product for editing (either existing or new)
+     */
     public void editProduct(Product p) {
         if (p == null) {
             setVisible(false);
@@ -152,7 +186,7 @@ public class ProductEditor extends FormLayout implements KeyNotifier {
         }
         persisted = p.getId() != null;
         if (persisted) {
-            // Find fresh entity for editing
+            //Find fresh entity for editing
             product = dataService.findProductByID(p.getId()).get();
         }
         else {
@@ -160,23 +194,31 @@ public class ProductEditor extends FormLayout implements KeyNotifier {
         }
         delete.setVisible(persisted);
 
-        // Bind customer properties to similarly named fields
-        // Could also use annotation or "manual binding" or programmatically
-        // moving values from fields to entities before saving
+        //Bind customer properties to similarly named fields
+        //Could also use annotation or "manual binding" or programmatically moving values from fields to entities before saving
         binder.setBean(product);
 
         setVisible(true);
 
-        // Focus first name initially
+        //Focus first name initially
         name.focus();
     }
 
+    /**
+     * Setter for the code to be executed from MainView through the ChangeHandler functional interface.
+     *
+     * @param h Code to be executed through the ChangeHandler onChange() method.
+     */
     public void setChangeHandler(ChangeHandler h) {
         // ChangeHandler is notified when either save or delete
         // is clicked
         changeHandler = h;
     }
 
+    /**
+     * Sets the labels of the company combo box depending on the available companies in the database.
+     * Custom companies are not allowed, a company has to already exist in the database to own a product.
+     */
     public void reloadCompanyComboBox() {
         company.setItems(dataService.findAllCompanies());
         company.setItemLabelGenerator(Company::getCompany);

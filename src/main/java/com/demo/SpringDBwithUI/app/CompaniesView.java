@@ -17,6 +17,10 @@ import com.vaadin.flow.server.auth.AnonymousAllowed;
 import javax.annotation.security.PermitAll;
 import java.util.TimerTask;
 
+/**
+ * View which lists the info of all companies in the database, as well as the number of
+ * products each company has
+ */
 @PermitAll
 //@AnonymousAllowed
 @Route("/companies")
@@ -35,6 +39,9 @@ public class CompaniesView extends VerticalLayout implements HasDynamicTitle {
 
     private final RouterLink productsLink;
 
+    /**
+     * Constructor for CompaniesView. Constructor injection is used for the two dependencies.
+     */
     public CompaniesView(DataService dataService, SecurityService securityService) {
 
         setSizeFull();
@@ -67,6 +74,11 @@ public class CompaniesView extends VerticalLayout implements HasDynamicTitle {
         logoutBtn.addThemeVariants(ButtonVariant.LUMO_ERROR);
     }
 
+    /**
+     * Method which dynamically returns the title of the page.
+     *
+     * @return The title of the page at /app/companies.
+     */
     @Override
     public String getPageTitle() {
         return "Companies | P&I Demo";

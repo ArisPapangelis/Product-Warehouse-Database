@@ -21,6 +21,15 @@ import java.time.LocalDateTime;
 @Component
 public class BadCredentialsAuthenticationEntryPoint implements AuthenticationEntryPoint {
 
+    /**
+     * Method which returns an authentication error message in Json format as ApiError.
+     *
+     * @see ApiError
+     * @param request The request that caused the exception.
+     * @param response The response that is returned by the exception handler.
+     * @param exception The exception that caused this method to be called.
+     * @throws IOException
+     */
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) throws IOException {
 

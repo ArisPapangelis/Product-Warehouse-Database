@@ -25,7 +25,7 @@ public class SpringDBwithUiApplication implements CommandLineRunner, AppShellCon
 
 	private final DataService dataService;
 
-	private static final Logger log = LoggerFactory.getLogger(SpringDBwithUiApplication.class);
+	//private static final Logger log = LoggerFactory.getLogger(SpringDBwithUiApplication.class);
 	public SpringDBwithUiApplication(DataService dataService) {
 		this.dataService = dataService;
 	}
