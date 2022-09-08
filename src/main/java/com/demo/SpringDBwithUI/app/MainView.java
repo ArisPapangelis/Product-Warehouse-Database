@@ -32,6 +32,10 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * View which lists the info of all products in the database, and also includes the
+ * product editor component to edit product information.
+ */
 @PermitAll
 //@AnonymousAllowed
 @Route("")
@@ -57,9 +61,18 @@ public class MainView extends VerticalLayout implements BeforeLeaveObserver, Has
     private final Grid<Company> companyInfo;
     private final RouterLink companiesLink;
 
+    /**
+     * Background task to periodically update the UI every few seconds, so as to keep in sync
+     * with the REST API.
+     */
     private TimerTask updateUI;
     private ScheduledExecutorService executor;
     private UI ui;
+
+
+    /**
+     * Constructor for MainView. Constructor injection is used for the two dependencies.
+     */
     public MainView(DataService dataService, SecurityService securityService) {
         addClassName("main-view");
         setSizeFull();
@@ -123,6 +136,7 @@ public class MainView extends VerticalLayout implements BeforeLeaveObserver, Has
         super.onAttach(attachEvent);
 
         ui = attachEvent.getUI();
+        //The implementation of updateUI is given here.
         this.updateUI = new TimerTask() {
             @Override
             public void run() {
@@ -140,11 +154,19 @@ public class MainView extends VerticalLayout implements BeforeLeaveObserver, Has
         startTimerTask();
     }
 
+    /**
+     * Method which is called when the user presses the log out button. Revokes access and returns the user to the log in screen.
+     */
     private void logout() {
         stopTimerTask();
         securityService.logout();
     }
 
+    /**
+     * Static method which changes the application theme from light mode to dark mode and vice versa.
+     *
+     * @param event Button click event on the toggle dark mode button.
+     */
     public static void toggleDarkMode(ClickEvent<Button> event) {
         ThemeList themeList = UI.getCurrent().getElement().getThemeList();
         if (themeList.contains(Lumo.DARK)) {
@@ -154,6 +176,13 @@ public class MainView extends VerticalLayout implements BeforeLeaveObserver, Has
         }
     }
 
+    /**
+     * Updates the product list with a new database call depending on filter criteria.
+     * Also updates the number of shown products.
+     *
+     * @param filterText The currently selected name filter
+     * @param company The currently selected company filter
+     */
     public void listProductsInGrid(String filterText, Company company) {
         List<Product> gridItems = dataService.findAllProducts(filterText,company);
         grid.setItems(gridItems);
@@ -161,6 +190,12 @@ public class MainView extends VerticalLayout implements BeforeLeaveObserver, Has
         //numberOfProducts.setValue("Number of products: 999");
     }
 
+    /**
+     * Method called when the user filters by company. Shows the info of the company and selects only the products
+     * that belong to the chosen company.
+     *
+     * @param event Company select event from the company filter combo box.
+     */
     private void selectCompany(AbstractField.ComponentValueChangeEvent<ComboBox<Company>,Company> event) {
 
         if (companySelector.isEmpty()) {
@@ -175,6 +210,9 @@ public class MainView extends VerticalLayout implements BeforeLeaveObserver, Has
         companySelector.blur();
     }
 
+    /**
+     * Method which initially configures all UI elements of the view.
+     */
     private void configureUIElements() {
         //Configure grid
         //grid.setHeight("500px");
@@ -234,6 +272,10 @@ public class MainView extends VerticalLayout implements BeforeLeaveObserver, Has
         listProductsInGrid(null, null);
     }
 
+    /**
+     * Method which is called from product editor, which is a child component, whenever save, cancel or delete is pressed,
+     * in order to update the UI based on database changes.
+     */
     private void onEditorChange() {
         productEditor.setVisible(false);
         grid.asSingleSelect().clear();
@@ -242,15 +284,26 @@ public class MainView extends VerticalLayout implements BeforeLeaveObserver, Has
     }
 
 
+    /**
+     * Method which stops updating the UI whenever the current view is left.
+     *
+     * @param beforeLeaveEvent Event when leaving the current view
+     */
     @Override
     public void beforeLeave(BeforeLeaveEvent beforeLeaveEvent) {
         stopTimerTask();
     }
 
+    /**
+     * Method which stops the execution of the periodic task of updating the UI.
+     */
     private void stopTimerTask() {
         executor.shutdown();
     }
 
+    /**
+     * Method which starts the execution of the periodic task of updating the UI every few seconds.
+     */
     private void startTimerTask() {
         executor = Executors.newSingleThreadScheduledExecutor();
         executor.scheduleAtFixedRate(updateUI, 1, 4, TimeUnit.SECONDS);
