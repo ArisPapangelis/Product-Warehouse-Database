@@ -1,4 +1,4 @@
-# Product-Warehouse-Database
+# Product Warehouse Database
  Web app that models a product warehouse database. Utilising Spring framework, Vaadin, MySQL.
  
  ## Supported features
