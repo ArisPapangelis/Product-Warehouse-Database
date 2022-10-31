@@ -104,10 +104,10 @@ public class WebSecurityConfig {
     @Bean
     public DataSource dataSource() {
         DriverManagerDataSource dataSource = new DriverManagerDataSource();
-        dataSource.setDriverClassName("com.mysql.cj.jdbc.Driver");
-        dataSource.setUrl("jdbc:mysql://localhost:3306/Products_DB");
-        dataSource.setUsername( "demo_user" );
-        dataSource.setPassword( "03081997" );
+        //dataSource.setDriverClassName("com.postgresql.cj.jdbc.Driver");
+        dataSource.setUrl("jdbc:postgresql://localhost:5432/GWT");
+        dataSource.setUsername( "postgres" );
+        dataSource.setPassword( "root");
         return dataSource;
     }
 
